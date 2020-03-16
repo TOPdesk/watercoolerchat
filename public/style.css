@@ -1,0 +1,39 @@
+html, body {
+	font-family: verdana, sans-serif;
+	background-color: #42A5AD;
+	color: #F4F0DE;
+	padding: 0;
+	margin: 0;
+	width: 100%;
+	height: 100%;
+}
+
+#app {
+	width: 100%;
+	height: 100%;
+}
+
+#watercooler {
+	background-image: url('watercooler.svg');
+	background-repeat: no-repeat;
+    background-size: auto 100%;
+	width: 50%;
+	height: 100%;
+	position: absolute;
+}
+
+#content {
+	width: 40%;
+	left: 50%;
+	position: absolute;
+	padding: 10px;
+}
+
+a {
+	color: #162A41;
+	text-decoration: none;
+}
+
+a:hover {
+	color: #101325;
+}
