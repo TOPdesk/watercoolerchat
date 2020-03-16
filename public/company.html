@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<title>Watercooler Chat Online!</title>
+	<script src="https://cdn.jsdelivr.net/npm/vue"></script>
+	<link rel="stylesheet" type="text/css" href="/style.css"/>
+</head>
+<body>
+    <div id="app">
+        <div id="watercooler"></div>
+        <div id="content">
+            <h1>Have a watercooler chat at <i>{{companyName}}</i>!</h1>
+            <p>Have a random chat with your colleagues from {{companyName}}, as if you are standing by the watercooler!</p>
+            
+            <template v-if="state == 'not-in-queue'">
+                <h2>Let's get started!</h2>
+                <form action="javascript:void(0)">
+                <label for="name">Enter your name (optional):</label><input type="text" name="name" id="name"/><br>
+                <input type="submit" class="bigbutton" value="Put me in the queue for a chat!" onclick="enterQueue()">
+                </form>
+
+                <h2>How it works:</h2>
+                <ul>
+                    <li>Decide on a moment with your colleagues to have a random chat, e.g. the typical coffee time 10am or 3pm</li>
+                    <li>Share this URL with your colleagues: <span style="white-space: nowrap;"><a :href="`https://watercoolerchat.online/company/${companyName}/`">https://watercoolerchat.online/company/{{companyName}}/</a></span></li>
+                    <li>Click the button to enter the queue.</li>
+                    <li>We select a random colleague for you to chat with.</li>
+                    <li>We'll show you both a unique link to a <a href="https://talky.io/" target="_blank" rel="noopener">Talky</a> chatroom.</li>
+                    <li>Click the link, set up your devices, and start chatting!</li>
+                </ul>
+            </template>
+        </div>
+    </div>
+    <script src="/watercoolerchat.js"></script>
+</body>
+</html>

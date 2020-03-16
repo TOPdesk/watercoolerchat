@@ -1,18 +1,23 @@
 import Koa from 'koa';
 import send from 'koa-send';
 import Router from '@koa/router';
+import { createReadStream } from 'fs';
+
 const router = Router();
 
 const port = process.env.PORT || 3000;
 const app = new Koa();
 
+const handle = async (ctx, next) => {
+    ctx.type = 'html';
+    ctx.body = createReadStream('public/company.html');
+}
+
 const resp = ({ response }) => {
     response.body = "hoi";
 }
 
-router.get('/company/:name', async (ctx) => {
-    ctx.body = "hallo " + ctx.params.name;
-});
+router.get('/company/:name', handle);
 
 router.get('/api/*', resp);
 
