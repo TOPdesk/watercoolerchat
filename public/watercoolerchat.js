@@ -1,11 +1,13 @@
 new Vue({
 	el: "#app",
 	data() {
-        var url = window.location.href.replace(/\/$/, '');
-        var name = url.substr(url.lastIndexOf('/') + 1);
-        console.log(name);
+        const url = window.location.href.replace(/\/$/, '');
+        const name = url.substr(url.lastIndexOf('/') + 1);
+        
         return {
             companyName: name,
+            userName: "Anonymous",
+            matchId: "",
             state: "not-in-queue" // "queued", "chat-ready"
         }
     }
