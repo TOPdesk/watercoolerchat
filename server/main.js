@@ -106,9 +106,7 @@ const findMatch = async ctx => {
         delete matchRequests[myMatchId];
     }
     else {
-        console.log(`${myMatchId} is taking a match`);
         const foundMatch = takeMatch(companyName, myMatchId);
-        console.log(`${myMatchId} took ${foundMatch}`);
         if (foundMatch) {
             matchResult = "found";
             chatUrl = generateTalkyUrl(companyName);
@@ -133,8 +131,7 @@ const findMatch = async ctx => {
     });
 }
 
-router.get('/company/:companyName', handleCompany);
-
+router.get('/at/:companyName', handleCompany);
 router.put('/api/queue', addToQueue);
 router.post('/api/match/:matchId', findMatch);
 

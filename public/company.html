@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-	<title>Watercooler Chat Online!</title>
+	<title>Have a watercooler chat online!</title>
 	<script src="https://cdn.jsdelivr.net/npm/vue"></script>
 	<link rel="stylesheet" type="text/css" href="/style.css"/>
 </head>
@@ -9,7 +9,7 @@
     <div id="app">
         <div id="watercooler"></div>
         <div id="content">
-            <h1>Have a watercooler chat at <i>{{companyName}}</i>!</h1>
+            <h1>Have a watercooler chat online at <i>{{companyName}}</i>!</h1>
             <p>Have a random chat with your colleagues from {{companyName}}, as if you are standing by the watercooler!</p>
             
             <template v-if="state == 'not-in-queue'">
@@ -24,7 +24,7 @@
                 <h2>How it works:</h2>
                 <ul>
                     <li>Decide on a moment with your colleagues to have a random chat, e.g. the typical coffee time 10am or 3pm</li>
-                    <li>Share this URL with your colleagues: <span style="white-space: nowrap;"><a :href="`https://watercoolerchat.online/company/${companyName}/`">https://watercoolerchat.online/company/{{companyName}}/</a></span></li>
+                    <li>Share this URL with your colleagues: <span style="white-space: nowrap;"><a :href="`https://have-a.watercoolerchat.online/at/${companyName}/`">https://have-a.watercoolerchat.online/at/{{companyName}}/</a></span></li>
                     <li>Click the button to enter the queue.</li>
                     <li>We select a random colleague for you to chat with.</li>
                     <li>We'll show you both a unique link to a free <a href="https://talky.io/" target="_blank" rel="noopener">Talky</a> chatroom.</li>
@@ -37,7 +37,7 @@
                     <p class="loadingmessage">We are looking for a chat partner</p>
                     <div class="loader">...</div>
                 </div>
-                <p>Share this URL with your colleagues: <span style="white-space: nowrap;"><a :href="`https://watercoolerchat.online/company/${companyName}/`">https://watercoolerchat.online/company/{{companyName}}/</a></span></p>
+                <p>Share this URL with your colleagues: <span style="white-space: nowrap;"><a :href="`https://have-a.watercoolerchat.online/at/${companyName}/`">https://have-a.watercoolerchat.online/at/{{companyName}}/</a></span></p>
             </template>
             
             <template v-if="state == 'chat-ready'">
@@ -45,7 +45,7 @@
                     <p class="loadingmessage">Chat partner found!</p>
                     <p>Go to Talky.io to chat<span v-if="chatPartner"> with <b>{{chatPartner}}</b></span>: <a :href="chatUrl" target="_blank" rel="noopener">{{chatUrl}}</a>
                 </div>
-                <p>Share this URL with your colleagues: <span style="white-space: nowrap;"><a :href="`https://watercoolerchat.online/company/${companyName}/`">https://watercoolerchat.online/company/{{companyName}}/</a></span></p>
+                <p>Share this URL with your colleagues: <span style="white-space: nowrap;"><a :href="`https://have-a.watercoolerchat.online/at/${companyName}/`">https://have-a.watercoolerchat.online/at/{{companyName}}/</a></span></p>
             </template>
         </div>
     </div>
