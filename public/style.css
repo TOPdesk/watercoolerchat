@@ -16,7 +16,7 @@ html, body {
 #watercooler {
 	background-image: url('watercooler.svg');
 	background-repeat: no-repeat;
-	background-size: auto 100%;
+	background-size: contain;
 	width: 50%;
 	height: 100%;
 	position: absolute;
