@@ -4,10 +4,12 @@ import bodyParser from 'koa-bodyparser';
 import Router from '@koa/router';
 import uuid from 'uuid';
 import { createReadStream } from 'fs';
+import forceHTTPS from 'koa-force-https';
 
 const router = Router();
 
 const port = process.env.PORT || 3000;
+const testMode = process.env.TEST_MODE && (process.env.TEST_MODE == 'true');
 const app = new Koa();
 
 const queue = {};
@@ -134,6 +136,11 @@ const findMatch = async ctx => {
 router.get('/at/:companyName', handleCompany);
 router.put('/api/queue', addToQueue);
 router.post('/api/match/:matchId', findMatch);
+
+if (!testMode) {
+    console.log("Production mode: enforcing HTTPS");
+    app.use(forceHTTPS());
+}
 
 app.use(bodyParser());
 
