@@ -74,7 +74,7 @@ const takeMatch = (companyName, matchId) => {
         return null;
     }
     const firstQueuedMatchId = queuedMatchIds[0];
-    queue[companyName] = queue[companyName].filter(queuedMatchId => (queuedMatchId != matchId || queuedMatchId != firstQueuedMatchId));
+    queue[companyName] = queue[companyName].filter(queuedMatchId => ![matchId, firstQueuedMatchId].includes(queuedMatchId));
     return firstQueuedMatchId;
 }
 
