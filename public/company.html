@@ -43,7 +43,7 @@
             <template v-if="state == 'chat-ready'">
                 <div class="messagebox">
                     <p class="loadingmessage">Chat partner found!</p>
-                    <p>Go to Talky.io to chat: <a href="https://talky.io/randomaddress" target="_blank" rel="noopener">https://talky.io/randomaddress</a>
+                    <p>Go to Talky.io to chat<span v-if="chatPartner"> with <b>{{chatPartner}}</b></span>: <a :href="chatUrl" target="_blank" rel="noopener">{{chatUrl}}</a>
                 </div>
                 <p>Share this URL with your colleagues: <span style="white-space: nowrap;"><a :href="`https://watercoolerchat.online/company/${companyName}/`">https://watercoolerchat.online/company/{{companyName}}/</a></span></p>
             </template>
