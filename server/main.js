@@ -106,12 +106,13 @@ const findMatch = async ctx => {
         delete matchRequests[myMatchId];
     }
     else {
-        const foundMatch = takeMatch(companyName, myMatchId);
-        if (foundMatch) {
+        const foundMatchId = takeMatch(companyName, myMatchId);
+        if (foundMatchId) {
             matchResult = "found";
             chatUrl = generateTalkyUrl(companyName);
+            chatPartner = matchRequests[foundMatchId].userName;
             const myName = matchRequests[myMatchId].userName;
-            matches[foundMatch] = {
+            matches[foundMatchId] = {
                 matchId: myMatchId,
                 chatUrl: chatUrl,
                 chatPartner: myName
