@@ -12,7 +12,7 @@ new Vue({
         
         return {
             companyName: name,
-            userName: "Anonymous",
+            userName: "",
             matchId: "",
             chatPartner: "",
             state: states.notInQueue
