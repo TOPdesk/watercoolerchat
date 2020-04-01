@@ -140,7 +140,7 @@ app.use(bodyParser());
 
 app.use(async (ctx, next) => {
     const path = ctx.path === "/" ? "/index.html" : ctx.path;
-    if (["/index.html", "/style.css", "/watercooler.svg", "/watercoolerchat.js", "/watercoolerchat-home.js", "/logo.png"].includes(path)) {
+    if (["/index.html", "/style.css", "/watercooler.svg", "/watercoolerchat.js", "/watercoolerchat-home.js", "/logo.png", "/favicon.ico"].includes(path)) {
         await send(ctx, path, { root: process.cwd() + '/public' });
     }
     await next();
