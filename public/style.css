@@ -29,6 +29,20 @@ html, body {
 	padding: 10px;
 }
 
+#footer {
+	position: fixed;
+	bottom: 0px;
+	width: 100%;
+	background-color: #42A5AD;
+	text-align: center;
+	padding-bottom: 5px;
+}
+
+img.TOPdesk-logo {
+	height: 1em;
+	padding: 0 5px;
+}
+
 h1, h2 {
 	font-family: 'bree-serif', 'Bree Serif', serif;
 }
