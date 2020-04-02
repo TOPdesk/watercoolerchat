@@ -1,6 +1,6 @@
 html, body {
 	font-family: 'Open Sans', sans-serif;
-	background-color: #42A5AD;
+	background-color: #2ea691;
 	color: #FFFFFF;
 	padding: 0;
 	margin: 0;
@@ -27,13 +27,14 @@ html, body {
 	left: 50%;
 	position: absolute;
 	padding: 10px;
+	padding-bottom: 4em;
 }
 
 #footer {
 	position: fixed;
 	bottom: 0px;
 	width: 100%;
-	background-color: #42A5AD;
+	background-color: #2ea691;
 	text-align: center;
 	padding: 5px 0;
 }
