@@ -1,4 +1,4 @@
-import { default as tap } from 'tap';
+import tap from 'tap';
 // FIXME: importing now starts the server
 //import '../lib/server.js';
 
