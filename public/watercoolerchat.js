@@ -13,7 +13,7 @@ new Vue({
         return {
             companyName: name,
             userName: "",
-            matchId: "",
+            queueId: "",
             chatPartner: "",
             state: states.notInQueue
         }
@@ -22,8 +22,8 @@ new Vue({
         async enterQueue() {
             this.state = states.queued;
             this.chatPartner = "";
-            this.matchId = (await this.addtoQueue(this.userName, this.companyName)).matchId;
-            window.setTimeout(() => this.searchChatPartner(this.matchId), 3000);
+            this.queueId = (await this.addtoQueue(this.userName, this.companyName)).queueId;
+            window.setTimeout(() => this.searchChatPartner(this.queueId), 3000);
         },
         async addtoQueue(userName, companyName) {
             return await this.doPut("/api/queue", {
@@ -41,8 +41,8 @@ new Vue({
             });
             return await response.json();
         },
-        async searchChatPartner(matchId) {
-            const response = await fetch(`/api/match/${matchId}`, {
+        async searchChatPartner(queueId) {
+            const response = await fetch(`/api/match/${queueId}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -55,7 +55,7 @@ new Vue({
                 this.state = states.chatReady;
             }
             else {
-                window.setTimeout(() => this.searchChatPartner(matchId), 5000);
+                window.setTimeout(() => this.searchChatPartner(queueId), 5000);
             }
         }
     }
