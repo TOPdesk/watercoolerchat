@@ -35,7 +35,11 @@ html, body {
 	width: 100%;
 	background-color: #42A5AD;
 	text-align: center;
-	padding-bottom: 5px;
+	padding: 5px 0;
+}
+
+.footeritem {
+	padding: 0 1em;
 }
 
 img.TOPdesk-logo {
