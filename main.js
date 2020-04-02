@@ -1,4 +1,11 @@
-// TODO: fix this, server should do an export
-import './lib/server.js';
+import {Server as _Server} from './lib/_server/server.js';
+import {Server} from './lib/server.js';
 
-// This is the main module.
+const server = (process.env.NEW_SERVER || false)
+	? new _Server()
+	: new Server();
+
+process.on('SIGINT', server.stop);
+process.on('SIGTERM', server.stop);
+
+server.start();
