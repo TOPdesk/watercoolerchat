@@ -6,12 +6,45 @@
   "type": "module",
   "scripts": {
     "start": "node --experimental-modules .",
-    "test": "tap --coverage"
+    "test": "tap --coverage",
+    "lint": "xo"
   },
   "tap": {
     "esm": false,
-    "node-arg": [ "--experimental-modules" ],
+    "node-arg": [
+      "--experimental-modules"
+    ],
     "coverage-map": ".coverage-map.cjs"
+  },
+  "engines": {
+    "node": ">= 12.16 < 13"
+  },
+  "xo": {
+    "rules": {
+      "import/extensions": [
+        "error",
+        "ignorePackages"
+      ],
+      "operator-linebreak": [
+        "error",
+        "after",
+        {
+          "overrides": {
+            "?": "before",
+            ":": "before"
+          }
+        }
+      ]
+    },
+    "overrides": [
+      {
+        "files": "public/**/*.js",
+        "envs": [
+          "es6",
+          "browser"
+        ]
+      }
+    ]
   },
   "author": "",
   "license": "MIT",
@@ -24,6 +57,7 @@
     "uuid": "^7.0.2"
   },
   "devDependencies": {
-    "tap": "^14.10.7"
+    "tap": "^14.10.7",
+    "xo": "^0.28.2"
   }
 }
