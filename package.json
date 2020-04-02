@@ -5,7 +5,13 @@
   "main": "./main.js",
   "type": "module",
   "scripts": {
-    "start": "node --experimental-modules ."
+    "start": "node --experimental-modules .",
+    "test": "tap --coverage"
+  },
+  "tap": {
+    "esm": false,
+    "node-arg": [ "--experimental-modules" ],
+    "coverage-map": ".coverage-map.cjs"
   },
   "author": "",
   "license": "MIT",
@@ -16,5 +22,8 @@
     "koa-bodyparser": "^4.2.1",
     "koa-send": "^5.0.0",
     "uuid": "^7.0.2"
+  },
+  "devDependencies": {
+    "tap": "^14.10.7"
   }
 }
