@@ -1,4 +1,4 @@
-import {Server as _Server} from './lib/_server/server.js';
+import {Server as _Server} from './lib/_server.js';
 import {Server} from './lib/server.js';
 
 const server = (process.env.NEW_SERVER || false)

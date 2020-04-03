@@ -1,5 +1,5 @@
 import tap from 'tap';
-import {Server, RequestHandler} from '../../lib/_server/server.js';
+import {Server, RequestHandler} from '../lib/_server.js';
 
 const {test} = tap;
 
