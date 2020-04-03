@@ -15,8 +15,8 @@
             <h1>Have a watercooler chat online at <i>{{companyName}}</i>!</h1>
             <p>Have a random chat with your colleagues from {{companyName}}, as if you are standing by the watercooler!</p>
             
-            <template v-if="state == 'not-in-queue'">
-                <div class="messagebox">
+			<div class="messagebox">
+            	<template v-if="state == 'not-in-queue'">
                     <p class="messageheader">Let's get started!</p>
                     <p>
                         <form action="javascript:void(0)">
@@ -24,8 +24,22 @@
                             <input type="submit" class="bigbutton" value="Put me in the queue for a chat!" v-on:click="enterQueue">
                         </form>
                     </p>
-                </div>
+                </template>
+            
+            	<template v-if="state == 'queued'">
+                    <p class="messageheader">We are looking for a chat partner</p>
+                    <div class="loader">...</div>
+					<br><br>
+                </template>
+            
+				<template v-if="state == 'chat-ready'">
+					<p class="messageheader">Chat partner found!</p>
+					<p>Go to Talky.io to chat<span v-if="chatPartner"> with <i>{{chatPartner}}</i></span>: <a :href="chatUrl" target="_blank" rel="noopener">{{chatUrl}}</a>
+				</template>
+			</div>
+			<p>Share this URL with your colleagues: <span style="white-space: nowrap;"><a :href="`https://have-a.watercoolerchat.online/at/${companyName}/`">https://have-a.watercoolerchat.online/at/{{companyName}}/</a></span></p>
 
+			<template v-if="state == 'not-in-queue'">
                 <h2>How it works:</h2>
                 <ul>
                     <li>Decide on a moment with your colleagues to have a random chat, e.g. the typical coffee time 10am or 3pm</li>
@@ -35,23 +49,6 @@
                     <li>We'll show you both a unique link to a free <a href="https://talky.io/" target="_blank" rel="noopener">Talky</a> chatroom.</li>
                     <li>Click the link, set up your devices, and start chatting!</li>
                 </ul>
-            </template>
-            
-            <template v-if="state == 'queued'">
-                <div class="messagebox">
-                    <p class="messageheader">We are looking for a chat partner</p>
-                    <div class="loader">...</div>
-                    <br><br>
-                </div>
-                <p>Share this URL with your colleagues: <span style="white-space: nowrap;"><a :href="`https://have-a.watercoolerchat.online/at/${companyName}/`">https://have-a.watercoolerchat.online/at/{{companyName}}/</a></span></p>
-            </template>
-            
-            <template v-if="state == 'chat-ready'">
-                <div class="messagebox">
-                    <p class="messageheader">Chat partner found!</p>
-                    <p>Go to Talky.io to chat<span v-if="chatPartner"> with <i>{{chatPartner}}</i></span>: <a :href="chatUrl" target="_blank" rel="noopener">{{chatUrl}}</a>
-                </div>
-                <p>Share this URL with your colleagues: <span style="white-space: nowrap;"><a :href="`https://have-a.watercoolerchat.online/at/${companyName}/`">https://have-a.watercoolerchat.online/at/{{companyName}}/</a></span></p>
             </template>
         </div>
     </div>
