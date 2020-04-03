@@ -37,6 +37,9 @@
         }
       ]
     },
+    "ignores": [
+      "lib/__*.js"
+    ],
     "overrides": [
       {
         "files": "public/**/*.js",
