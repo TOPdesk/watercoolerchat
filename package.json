@@ -58,6 +58,7 @@
     "koa": "^2.11.0",
     "koa-bodyparser": "^4.2.1",
     "koa-send": "^5.0.0",
+    "koa-static": "^5.0.0",
     "mongodb": "^3.5.5",
     "uuid": "^7.0.2",
     "web-push": "^3.4.3"
