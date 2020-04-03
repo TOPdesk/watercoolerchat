@@ -3,9 +3,9 @@
 <head>
 	<title>Have a watercooler chat online!</title>
 	<script src="https://cdn.jsdelivr.net/npm/vue"></script>
-    <link rel="icon" href="/favicon.ico" type="image/x-icon">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans" type="text/css" />
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Bree+Serif" type="text/css" />
+	<link rel="icon" href="/favicon.ico" type="image/x-icon">
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans" type="text/css" />
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Bree+Serif" type="text/css" />
 	<link rel="stylesheet" type="text/css" href="/style.css"/>
 </head>
 <body>
@@ -14,7 +14,7 @@
         <div id="content">
             <h1>Have a watercooler chat online at <i>{{companyName}}</i>!</h1>
             <p>Have a random chat with your colleagues from {{companyName}}, as if you are standing by the watercooler!</p>
-            
+
 			<div class="messagebox">
             	<template v-if="state == 'not-in-queue'">
                     <p class="messageheader">Let's get started!</p>
@@ -25,17 +25,18 @@
                         </form>
                     </p>
                 </template>
-            
+
             	<template v-if="state == 'queued'">
                     <p class="messageheader">We are looking for a chat partner</p>
                     <div class="loader">...</div>
 					<br><br>
                 </template>
-            
+
 				<template v-if="state == 'chat-ready'">
 					<p class="messageheader">Chat partner found!</p>
 					<p>Go to Talky.io to chat<span v-if="chatPartner"> with <i>{{chatPartner}}</i></span>: <a :href="chatUrl" target="_blank" rel="noopener">{{chatUrl}}</a>
 				</template>
+				<p><button disabled class="js-push-btn switch"><input type="checkbox" id="notificationsEnabled"><span class="slider round"></span> <label for="notificationsEnabled">let me know if somebody is standing at the online watercooler</label></p>
 			</div>
 			<p>Share this URL with your colleagues: <span style="white-space: nowrap;"><a :href="`https://have-a.watercoolerchat.online/at/${companyName}/`">https://have-a.watercoolerchat.online/at/{{companyName}}/</a></span></p>
 
@@ -53,11 +54,12 @@
         </div>
     </div>
     <div id="footer">
-        <span class="footeritem">Powered by <a href="https://topdesk.com/" target="_blank"><img src="/logo.png" class="TOPdesk-logo" alt="TOPdesk"></a> your guides to service excellence</span> - 
-        <span class="footeritem"><a href="mailto:info@topdesk.com" rel="noopener noreferrer">Questions?</a></span> - 
-        <span class="footeritem"><a href="https://www.topdesk.com/nl/privacyverklaring/" target="_blank">Privacy Policy</a></span> - 
+        <span class="footeritem">Powered by <a href="https://topdesk.com/" target="_blank"><img src="/logo.png" class="TOPdesk-logo" alt="TOPdesk"></a> your guides to service excellence</span> -
+        <span class="footeritem"><a href="mailto:info@topdesk.com" rel="noopener noreferrer">Questions?</a></span> -
+        <span class="footeritem"><a href="https://www.topdesk.com/nl/privacyverklaring/" target="_blank">Privacy Policy</a></span> -
         <span class="footeritem"><a href="https://github.com/TOPdesk/watercoolerchat/" target="_blank" rel="noopener noreferrer">Source code</a></span>
     </div>
-    <script src="/watercoolerchat.js"></script>
+		<script src="/watercoolerchat.js"></script>
+		<script src="/notifications.js"></script>
 </body>
 </html>
