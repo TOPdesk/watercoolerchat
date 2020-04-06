@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "start": "node --experimental-modules .",
-    "test": "c8 --all tap",
+    "test": "c8 --all --reporter text --reporter text-summary tap",
     "lint": "xo"
   },
   "tap": {
