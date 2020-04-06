@@ -16,7 +16,7 @@
             <p>Have a random chat with your colleagues from {{companyName}}, as if you are standing by the watercooler!</p>
 
 			<div class="messagebox">
-            	<template v-if="state == 'not-in-queue'">
+            	<template v-if="state === 'not-in-queue'">
                     <p class="messageheader">Let's get started!</p>
                     <p>
                         <form action="javascript:void(0)">
@@ -26,13 +26,13 @@
                     </p>
                 </template>
 
-            	<template v-if="state == 'queued'">
+            	<template v-if="state === 'queued'">
                     <p class="messageheader">We are looking for a chat partner</p>
                     <div class="loader">...</div>
 					<br><br>
                 </template>
 
-				<template v-if="state == 'chat-ready'">
+				<template v-if="state === 'chat-ready'">
 					<p class="messageheader">Chat partner found!</p>
 					<p>Go to Talky.io to chat<span v-if="chatPartner"> with <i>{{chatPartner}}</i></span>: <a :href="chatUrl" target="_blank" rel="noopener">{{chatUrl}}</a>
 				</template>
