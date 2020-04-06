@@ -182,5 +182,5 @@ if ('serviceWorker' in navigator && 'PushManager' in window) {
 		});
 } else {
 	console.warn('Push messaging is not supported');
-	pushButton.textContent = 'Niet ondersteund';
+	pushButton.textContent = 'Not supported';
 }
