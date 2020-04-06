@@ -121,6 +121,9 @@ test('Assets', sub => {
 		respond(request, response);
 		await response.finished;
 		t.same(response.buffer(), faviconBuffer, 'returns content when modified since');
+
+		// TODO: if-none-match
+
 		t.end();
 	});
 	sub.end();
