@@ -11,6 +11,7 @@ new Vue({ // eslint-disable-line no-new, no-undef
 		const name = url.slice(url.lastIndexOf('/') + 1);
 
 		return {
+			features: [],
 			companyName: name,
 			userName: '',
 			queueId: '',
@@ -53,6 +54,18 @@ new Vue({ // eslint-disable-line no-new, no-undef
 			} else {
 				window.setTimeout(() => this.searchChatPartner(queueId), 5000);
 			}
+		},
+		async retrieveFeatures() {
+			const response = await fetch('/api/features/enabled', {
+				headers: {
+					'Content-Type': 'application/json'
+				}
+			});
+			const result = await response.json();
+			this.features = result.features;
 		}
+	},
+	async created() {
+		this.retrieveFeatures();
 	}
 });
