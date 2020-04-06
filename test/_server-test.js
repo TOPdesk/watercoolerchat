@@ -99,7 +99,8 @@ test('Assets', sub => {
 		await response.finished;
 		t.same(response.head(), [304, 'Not Modified'], 'if not modified sine, it is a 304');
 
-		const {mtime: faviconMtime} = await stat('public/favicon.ico');
+		const {mtime} = await stat('public/favicon.ico');
+		const faviconMtime = new Date(mtime).toUTCString();
 		const faviconBuffer = await readFile('public/favicon.ico');
 		const hash = createHash('md5');
 		hash.setEncoding('hex');
