@@ -21,6 +21,8 @@ const urlB64ToUint8Array = base64String => {
 	return outputArray;
 };
 
+const appServerKey = urlB64ToUint8Array(appServerPublicKey);
+
 const sendUnsubscribeToBackEnd = async subscriptionId => {
 	const response = await fetch('/api/notifications/unsubscribe', {
 		method: 'POST',
@@ -95,8 +97,6 @@ Vue.component('notifications-button', { // eslint-disable-line no-undef
 			}
 		},
 		async subscribeUser() {
-			const appServerKey = urlB64ToUint8Array(appServerPublicKey);
-
 			try {
 				const subscription = await this.swRegistration.pushManager.subscribe({
 					userVisibleOnly: true,
