@@ -27,7 +27,8 @@ new Vue({ // eslint-disable-line no-new, no-undef
 			window.setTimeout(() => this.searchChatPartner(this.queueId), 3000);
 		},
 		async addtoQueue(userName, companyName) {
-			return this.doPut('/api/queue', {userName, companyName});
+			const subscriptionId = localStorage.getItem('subscriptionId');
+			return this.doPut('/api/queue', {userName, companyName, subscriptionId});
 		},
 		async doPut(url, data) {
 			const response = await fetch(url, {
