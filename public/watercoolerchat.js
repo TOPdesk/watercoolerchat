@@ -1,8 +1,12 @@
-const states = {
+const states = Object.freeze({
 	notInQueue: 'not-in-queue',
 	queued: 'queued',
 	chatReady: 'chat-ready'
-};
+});
+
+if (!window.location.href.startsWith('https') && !window.location.href.startsWith('http://localhost')) {
+	window.location.href = window.location.href.replace('http', 'https');
+}
 
 new Vue({ // eslint-disable-line no-new, no-undef
 	el: '#app',
