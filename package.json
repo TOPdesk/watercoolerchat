@@ -36,6 +36,14 @@
             ":": "before"
           }
         }
+      ],
+      "capitalized-comments": [
+        "error",
+        "always",
+        {
+            "ignorePattern": "c8",
+            "ignoreInlineComments": true
+        }
       ]
     },
     "ignores": [

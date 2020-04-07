@@ -7,6 +7,9 @@ import {Server, RequestHandler} from '../lib/_server.js';
 const {test} = tap;
 const {stat, readFile} = fsPromises;
 
+const headers = {host: 'localhost'};
+const {respond} = new RequestHandler();
+
 test('Server can be started and stopped', t => {
 	t.plan(2);
 	const server = new Server();
@@ -18,8 +21,6 @@ test('Server can be started and stopped', t => {
 });
 
 test('Assets', _t => {
-	const headers = {host: 'localhost'};
-	const {respond} = new RequestHandler();
 	_t.test('Requesting dotfiles', t => {
 		const request = {url: '/.hidden', headers};
 		const response = new MockResponse();
@@ -92,20 +93,14 @@ test('Assets', _t => {
 
 		t.end();
 	});
-	_t.test('Headers', async t => {
+	_t.test('Headers and Responses', async t => {
 		let request = {url: '/favicon.ico', headers: {'if-modified-since': '3000-01-01T01:00:00.000Z', ...headers}};
 		let response = new MockResponse();
 		respond(request, response);
 		await response.finished;
-		t.same(response.head(), [304, 'Not Modified'], 'if not modified sine, it is a 304');
+		t.same(response.head(), [304, 'Not Modified'], 'if not modified since, it is a 304');
 
-		const {mtime} = await stat('public/favicon.ico');
-		const faviconMtime = new Date(mtime).toUTCString();
-		const faviconBuffer = await readFile('public/favicon.ico');
-		const hash = createHash('md5');
-		hash.setEncoding('hex');
-		hash.end(faviconBuffer);
-		const faviconHash = hash.read();
+		const {mtime: faviconMtime, hash: faviconHash, buffer: faviconBuffer} = await getAssetInfo('public/favicon.ico');
 
 		request = {url: '/favicon.ico', headers};
 		response = new MockResponse();
@@ -122,13 +117,43 @@ test('Assets', _t => {
 		await response.finished;
 		t.same(response.buffer(), faviconBuffer, 'returns content when modified since');
 
-		// TODO: if-none-match
-		// TODO: test encoding?
+		const {hash: indexHash, buffer: indexBuffer} = await getAssetInfo('public/index.html');
+		request = {url: '/', headers: {'if-none-match': indexHash, ...headers}};
+		response = new MockResponse();
+		respond(request, response);
+		await response.finished;
+		t.same(response.head(), [304, 'Not Modified'], 'if ETag matches, it is a 304');
+
+		request = {url: '/', headers: {'if-none-match': 'notmatches', ...headers}};
+		response = new MockResponse();
+		respond(request, response);
+		await response.finished;
+		t.same(response.buffer(), indexBuffer, 'returns content ETag does not match');
 
 		t.end();
 	});
 	_t.end();
 });
+
+test('API', t => {
+	const request = {url: '/api/', headers};
+	const response = new MockResponse();
+	t.throws(() => respond(request, response), new Error('Not implemented'), 'throws Not implemented Error');
+	t.end();
+});
+
+async function getAssetInfo(assetPath) {
+	const {mtime} = await stat(assetPath);
+	const buffer = await readFile(assetPath);
+	const hash = createHash('md5');
+	hash.setEncoding('hex');
+	hash.end(buffer);
+	return {
+		mtime: new Date(mtime).toUTCString(),
+		hash: hash.read(),
+		buffer
+	};
+}
 
 function MockResponse() {
 	const stream = new Writable();
@@ -143,12 +168,24 @@ function MockResponse() {
 	stream.head = () => Object.freeze(head);
 	stream.headers = () => Object.freeze(headers);
 	stream.write = chunk => {
+		if (typeof chunk === 'string') {
+			if (typeof buffer === 'string') {
+				buffer += chunk;
+				return;
+			}
+
+			buffer = chunk;
+			return;
+		}
+
 		buffer = Buffer.concat([buffer, chunk]);
 	};
 
+	stream.buffer = () => Buffer.from(buffer);
+
 	stream._end = stream.end;
 	stream.end = (chunk, encoding) => stream._end(chunk, encoding, finishedCallback);
-	stream.buffer = () => Buffer.from(buffer);
+
 	stream.setHeader = (header, value) => {
 		headers[header] = value;
 	};
