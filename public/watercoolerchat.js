@@ -1,19 +1,18 @@
+import {getCompanyNameFromUrl, redirectToHttps} from './utils.js';
+
+redirectToHttps();
+
 const states = Object.freeze({
 	notInQueue: 'not-in-queue',
 	queued: 'queued',
 	chatReady: 'chat-ready'
 });
 
-if (!window.location.href.startsWith('https') && !window.location.href.startsWith('http://localhost')) {
-	window.location.href = window.location.href.replace('http', 'https');
-}
+const companyName = getCompanyNameFromUrl();
 
 new Vue({ // eslint-disable-line no-new, no-undef
 	el: '#app',
 	data() {
-		const url = window.location.href.replace(/\/$/, '');
-		const companyName = url.slice(url.lastIndexOf('/') + 1);
-
 		return {
 			features: [],
 			companyName,

@@ -1,9 +1,10 @@
 'use strict';
 
+import {getCompanyNameFromUrl} from './utils.js';
+
 const appServerPublicKey = 'BKHcfZBeFKoeKhkgC1L9qbnG-1zrMymK-AuMSlqvgLgLnbKHpVy5hHNFCcwIWnagUvoaXWgNnjoQJnIN6-i0i5E';
 
-const url = window.location.href.replace(/\/$/, '');
-const companyName = url.slice(url.lastIndexOf('/') + 1);
+const companyName = getCompanyNameFromUrl();
 
 const urlB64ToUint8Array = base64String => {
 	const padding = '='.repeat((4 - base64String.length % 4) % 4); // eslint-disable-line no-mixed-operators

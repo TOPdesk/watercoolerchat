@@ -2,7 +2,12 @@
 <html lang="en">
 <head>
 	<title>Have a watercooler chat online!</title>
-    <script src="/watercoolerchat-home.js"></script>
+		<script type="module">
+			import {redirectToHttps, getStarted} from './utils.js';
+
+			redirectToHttps();
+			document.querySelector('#getstartedbutton').addEventListener('click', getStarted);
+		</script>
     <link rel="icon" href="/favicon.ico" type="image/x-icon">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans" type="text/css" />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Bree+Serif" type="text/css" />
@@ -14,7 +19,7 @@
         <div id="content">
             <h1>Have a watercooler chat ONLINE!</h1>
             <p>Have a random chat with your colleagues, as if you are standing by the watercooler!</p>
-            
+
             <h2>How it works:</h2>
             <ul>
                 <li>Decide on a moment with your colleagues to have a random chat, e.g. the typical coffee time 10am or 3pm</li>
@@ -30,16 +35,16 @@
                 <p>
                     <form action="javascript:void(0)">
                         <label for="company-name">Enter your company name:</label><input type="text" name="company-name" id="company-name"/><br>
-                        <input type="submit" class="bigbutton" value="Have a watercooler chat!" onclick="getStarted()">
+                        <input type="submit" id="getstartedbutton" class="bigbutton" value="Have a watercooler chat!">
                    </form>
                 </p>
             </div>
         </div>
     </div>
     <div id="footer">
-        <span class="footeritem">Powered by <a href="https://topdesk.com/" target="_blank"><img src="/logo.png" class="TOPdesk-logo" alt="TOPdesk"></a> your guides to service excellence</span> - 
-        <span class="footeritem"><a href="mailto:info@topdesk.com" rel="noopener noreferrer">Questions?</a></span> - 
-        <span class="footeritem"><a href="https://www.topdesk.com/nl/privacyverklaring/" target="_blank">Privacy Policy</a></span> - 
+        <span class="footeritem">Powered by <a href="https://topdesk.com/" target="_blank"><img src="/logo.png" class="TOPdesk-logo" alt="TOPdesk"></a> your guides to service excellence</span> -
+        <span class="footeritem"><a href="mailto:info@topdesk.com" rel="noopener noreferrer">Questions?</a></span> -
+        <span class="footeritem"><a href="https://www.topdesk.com/nl/privacyverklaring/" target="_blank">Privacy Policy</a></span> -
         <span class="footeritem"><a href="https://github.com/TOPdesk/watercoolerchat/" target="_blank" rel="noopener noreferrer">Source code</a></span>
     </div>
 </body>
