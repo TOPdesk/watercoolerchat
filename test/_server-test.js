@@ -52,37 +52,37 @@ test('Assets', sub => {
 		response = new MockResponse();
 		respond(request, response);
 		await response.finished;
-		t.same(response.headers().slice(-2), ['Content-Type', 'text/css; charset=utf-8'], 'css has text/css content type, and utf-8 encoding');
+		t.match(response.headers(), {'Content-Type': 'text/css; charset=utf-8'}, 'css has text/css content type, and utf-8 encoding');
 
 		request = {url: '/some.html', headers};
 		response = new MockResponse();
 		respond(request, response);
 		await response.finished;
-		t.same(response.headers().slice(-2), ['Content-Type', 'text/html; charset=utf-8'], 'html has text/html content type, and utf-8 encoding');
+		t.match(response.headers(), {'Content-Type': 'text/html; charset=utf-8'}, 'html has text/html content type, and utf-8 encoding');
 
 		request = {url: '/some.ico', headers};
 		response = new MockResponse();
 		respond(request, response);
 		await response.finished;
-		t.same(response.headers().slice(-2), ['Content-Type', 'image/x-icon'], 'ico has image/x-icon content type');
+		t.match(response.headers(), {'Content-Type': 'image/x-icon'}, 'ico has image/x-icon content type');
 
 		request = {url: '/some.js', headers};
 		response = new MockResponse();
 		respond(request, response);
 		await response.finished;
-		t.same(response.headers().slice(-2), ['Content-Type', 'application/javascript; charset=utf-8'], 'js has text/html content type, and utf-8 encoding');
+		t.match(response.headers(), {'Content-Type': 'application/javascript; charset=utf-8'}, 'js has text/html content type, and utf-8 encoding');
 
 		request = {url: '/some.png', headers};
 		response = new MockResponse();
 		respond(request, response);
 		await response.finished;
-		t.same(response.headers().slice(-2), ['Content-Type', 'image/png'], 'png has image/png content type');
+		t.match(response.headers(), {'Content-Type': 'image/png'}, 'png has image/png content type');
 
 		request = {url: '/some.svg', headers};
 		response = new MockResponse();
 		respond(request, response);
 		await response.finished;
-		t.same(response.headers().slice(-2), ['Content-Type', 'image/svg+xml; charset=utf-8'], 'svg has image/svg+xml content type, and utf-8 encoding');
+		t.match(response.headers(), {'Content-Type': 'image/svg+xml; charset=utf-8'}, 'svg has image/svg+xml content type, and utf-8 encoding');
 
 		request = {url: '/some.unknown', headers};
 		response = new MockResponse();
@@ -111,9 +111,9 @@ test('Assets', sub => {
 		response = new MockResponse();
 		respond(request, response);
 		await response.finished;
-		t.same(response.headers().slice(0, 2), ['Last-Modified', faviconMtime], 'response has Last Modified header set');
-		t.same(response.headers().slice(2, 4), ['ETag', faviconHash], 'response has Etag header set');
-		t.same(response.headers().slice(4, 6), ['Cache-Control', 'max-age=0, private'], 'response has Cache Control header set');
+		t.match(response.headers(), {'Last-Modified': faviconMtime}, 'response has Last Modified header set');
+		t.match(response.headers(), {'ETag': faviconHash}, 'response has Etag header set');
+		t.match(response.headers(), {'Cache-Control': 'max-age=0, private'}, 'response has Cache Control header set');
 		t.same(response.buffer(), faviconBuffer, 'returns content when no If-Modified-Since heder was sent');
 
 		request = {url: '/favicon.ico', headers: {'if-modified-since': '2000-01-01T01:00:00.000Z', ...headers}};
@@ -132,7 +132,7 @@ test('Assets', sub => {
 function MockResponse() {
 	const stream = new Writable();
 	const head = [];
-	const headers = [];
+	const headers = {};
 	let buffer = Buffer.from([]);
 	let _resolve = null;
 
@@ -147,11 +147,9 @@ function MockResponse() {
 
 	stream._end = stream.end;
 	stream.end = (chunk, encoding) => stream._end(chunk, encoding, _resolve);
-	stream.buffer = () => buffer;
-
+	stream.buffer = () => Buffer.from(buffer);
 	stream.setHeader = (header, value) => {
-		headers.push(header);
-		headers.push(value);
+		headers[header] = value;
 	};
 
 	stream.writeHead = (code, message) => {
