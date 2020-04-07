@@ -5,12 +5,6 @@ const appServerPublicKey = 'BKHcfZBeFKoeKhkgC1L9qbnG-1zrMymK-AuMSlqvgLgLnbKHpVy5
 const url = window.location.href.replace(/\/$/, '');
 const companyName = url.slice(url.lastIndexOf('/') + 1);
 
-const pushButton = document.querySelector('.js-push-btn');
-const checkbox = document.querySelector('#notificationsEnabled');
-
-let isSubscribed = false;
-let swRegistration = null;
-
 const urlB64ToUint8Array = base64String => {
 	const padding = '='.repeat((4 - base64String.length % 4) % 4); // eslint-disable-line no-mixed-operators
 	const base64 = (base64String + padding)
@@ -27,49 +21,27 @@ const urlB64ToUint8Array = base64String => {
 	return outputArray;
 };
 
-const updateSubscriptionOnServer = async subscription => {
-	const subscriptionId = localStorage.getItem('subscriptionId');
-	if (subscription !== null) {
-		await sendSubscriptionToBackEnd(subscription);
-	} else if (subscriptionId !== null) {
-		console.log(`Removing subscription: ${subscriptionId}`);
-		await sendUnsubscribeToBackEnd(subscriptionId);
-		localStorage.removeItem('subscriptionId');
-	}
-};
-
-const subscribeUser = () => {
-	const appServerKey = urlB64ToUint8Array(appServerPublicKey);
-
-	swRegistration.pushManager.subscribe({
-		userVisibleOnly: true,
-		applicationServerKey: appServerKey
+const sendUnsubscribeToBackEnd = subscriptionId => {
+	return fetch('/api/notifications/unsubscribe', {
+		method: 'POST',
+		headers: {
+			'Content-Type': 'application/json'
+		},
+		body: JSON.stringify({
+			subscriptionId
+		})
 	})
-		.then(subscription => {
-			updateSubscriptionOnServer(subscription);
-			isSubscribed = true;
-			updateButton();
-		})
-		.catch(error => {
-			console.log('Failed to subscribe the user:', error);
-			updateButton();
-		});
-};
-
-const unsubscribeUser = () => {
-	swRegistration.pushManager.getSubscription()
-		.then(subscription => {
-			if (subscription) {
-				return subscription.unsubscribe();
+		.then(response => {
+			if (!response.ok) {
+				throw new Error('Bad status code from server.');
 			}
+
+			return response.json();
 		})
-		.catch(error => {
-			console.log('Error unsubscribing', error);
-		})
-		.then(() => {
-			updateSubscriptionOnServer(null);
-			isSubscribed = false;
-			updateButton();
+		.then(responseData => {
+			if (!(responseData.data && responseData.data.success)) {
+				throw new Error('Bad response from server.');
+			}
 		});
 };
 
@@ -102,85 +74,109 @@ const sendSubscriptionToBackEnd = async subscription => {
 		});
 };
 
-const sendUnsubscribeToBackEnd = subscriptionId => {
-	return fetch('/api/notifications/unsubscribe', {
-		method: 'POST',
-		headers: {
-			'Content-Type': 'application/json'
-		},
-		body: JSON.stringify({
-			subscriptionId
-		})
-	})
-		.then(response => {
-			if (!response.ok) {
-				throw new Error('Bad status code from server.');
-			}
-
-			return response.json();
-		})
-		.then(responseData => {
-			if (!(responseData.data && responseData.data.success)) {
-				throw new Error('Bad response from server.');
-			}
-		});
+const updateSubscriptionOnServer = async subscription => {
+	const subscriptionId = localStorage.getItem('subscriptionId');
+	if (subscription !== null) {
+		await sendSubscriptionToBackEnd(subscription);
+	} else if (subscriptionId !== null) {
+		console.log(`Removing subscription: ${subscriptionId}`);
+		await sendUnsubscribeToBackEnd(subscriptionId);
+		localStorage.removeItem('subscriptionId');
+	}
 };
 
-const initializeUI = () => {
-	pushButton.addEventListener('click', () => {
-		pushButton.disabled = true;
-		if (isSubscribed) {
-			unsubscribeUser();
-		} else {
-			subscribeUser();
-		}
-	});
-
-	// Set the initial subscription value
-	swRegistration.pushManager.getSubscription()
-		.then(subscription => {
-			isSubscribed = !(subscription === null);
-
-			if (isSubscribed) {
-				console.log('User IS subscribed.');
+Vue.component('notifications-button', { // eslint-disable-line no-undef
+	data() {
+		return {
+			swRegistration: null,
+			label: 'Notify me when somebody is at the online watercooler',
+			disabled: false,
+			subscribed: false
+		};
+	},
+	methods: {
+		toggleNotifications() {
+			this.disabled = true;
+			if (this.subscribed) {
+				this.unsubscribeUser();
 			} else {
-				console.log('User is NOT subscribed.');
+				this.subscribeUser();
+			}
+		},
+		subscribeUser() {
+			const appServerKey = urlB64ToUint8Array(appServerPublicKey);
+
+			this.swRegistration.pushManager.subscribe({
+				userVisibleOnly: true,
+				applicationServerKey: appServerKey
+			})
+				.then(subscription => {
+					updateSubscriptionOnServer(subscription);
+					this.subscribed = true;
+					this.updateButton();
+				})
+				.catch(error => {
+					console.log('Failed to subscribe the user:', error);
+					this.updateButton();
+				});
+		},
+		unsubscribeUser() {
+			this.swRegistration.pushManager.getSubscription()
+				.then(subscription => {
+					if (subscription) {
+						return subscription.unsubscribe();
+					}
+				})
+				.catch(error => {
+					console.log('Error unsubscribing', error);
+				})
+				.then(() => {
+					updateSubscriptionOnServer(null);
+					this.subscribed = false;
+					this.updateButton();
+				});
+		},
+		updateButton() {
+			if (Notification.permission === 'denied') {
+				this.label = 'Notification blocked, please allow us to send your browser notifications';
+				this.subscribed = false;
+				this.disabled = true;
+				updateSubscriptionOnServer(null);
+				return;
 			}
 
-			updateButton();
-		});
-};
+			this.disabled = false;
+		}
+	},
+	created() {
+		if ('serviceWorker' in navigator && 'PushManager' in window) {
+			console.log('Service Worker and Push is supported');
 
-const updateButton = () => {
-	if (Notification.permission === 'denied') {
-		pushButton.textContent = 'BLOCKED';
-		pushButton.disabled = true;
-		updateSubscriptionOnServer(null);
-		return;
-	}
+			navigator.serviceWorker.register('/sw.js')
+				.then(swReg => {
+					console.log('Service Worker is registered', swReg);
+					this.swRegistration = swReg;
 
-	if (isSubscribed) {
-		checkbox.checked = true;
-	} else {
-		checkbox.checked = false;
-	}
+					// Set the initial subscription value
+					this.swRegistration.pushManager.getSubscription().then(subscription => {
+						this.subscribed = !(subscription === null);
 
-	pushButton.disabled = false;
-};
+						if (this.subscribed) {
+							console.log('User IS subscribed.');
+						} else {
+							console.log('User is NOT subscribed.');
+						}
 
-if ('serviceWorker' in navigator && 'PushManager' in window) {
-	console.log('Service Worker and Push is supported');
-
-	navigator.serviceWorker.register('/sw.js')
-		.then(swReg => {
-			console.log('Service Worker is registered', swReg);
-			swRegistration = swReg;
-			initializeUI();
-		})
-		.catch(error => {
-			console.error('Service Worker Error', error);
-		});
-} else {
-	console.warn('Push messaging is not supported');
-	pushButton.textContent = 'Not supported';
-}
+						this.updateButton();
+					});
+				})
+				.catch(error => {
+					console.error('Service Worker Error', error);
+				});
+		} else {
+			console.warn('Push messaging is not supported');
+			this.label = 'Notifications not supported';
+		}
+	},
+	template: '<button id="notificationsbutton" class="notificationsmessage" v-on:click="toggleNotifications" :disabled="disabled"><input type="checkbox" id="notificationsenabled" v-model="subscribed"> <label id="notificationslabel" for="notificationsEnabled">{{ label }}</label></button>'
+});

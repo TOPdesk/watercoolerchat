@@ -3,6 +3,7 @@
 <head>
 	<title>Have a watercooler chat online!</title>
 	<script src="https://cdn.jsdelivr.net/npm/vue"></script>
+	<script src="/notifications.js"></script>
 	<link rel="icon" href="/favicon.ico" type="image/x-icon">
 	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans" type="text/css" />
 	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Bree+Serif" type="text/css" />
@@ -36,10 +37,7 @@
 					<p class="messageheader">Chat partner found!</p>
 					<p>Go to Talky.io to chat<span v-if="chatPartner"> with <i>{{chatPartner}}</i></span>: <a :href="chatUrl" target="_blank" rel="noopener">{{chatUrl}}</a>
 				</template>
-				<template v-if="features.includes('notifications')">
-					<p><button disabled class="js-push-btn switch"><input type="checkbox" id="notificationsEnabled"><span class="slider round"></span> <label for="notificationsEnabled">let me know if somebody is standing at the online watercooler</label></p>
-					<script src="/notifications.js"></script>
-				</template>
+				<notifications-button v-if="features.includes('notifications')">
 			</div>
 			<p>Share this URL with your colleagues: <span style="white-space: nowrap;"><a :href="`https://have-a.watercoolerchat.online/at/${companyName}/`">https://have-a.watercoolerchat.online/at/{{companyName}}/</a></span></p>
 
