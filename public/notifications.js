@@ -21,8 +21,8 @@ const urlB64ToUint8Array = base64String => {
 	return outputArray;
 };
 
-const sendUnsubscribeToBackEnd = subscriptionId => {
-	return fetch('/api/notifications/unsubscribe', {
+const sendUnsubscribeToBackEnd = async subscriptionId => {
+	const response = await fetch('/api/notifications/unsubscribe', {
 		method: 'POST',
 		headers: {
 			'Content-Type': 'application/json'
@@ -30,23 +30,19 @@ const sendUnsubscribeToBackEnd = subscriptionId => {
 		body: JSON.stringify({
 			subscriptionId
 		})
-	})
-		.then(response => {
-			if (!response.ok) {
-				throw new Error('Bad status code from server.');
-			}
+	});
+	if (!response.ok) {
+		throw new Error('Bad status code from server.');
+	}
 
-			return response.json();
-		})
-		.then(responseData => {
-			if (!(responseData.data && responseData.data.success)) {
-				throw new Error('Bad response from server.');
-			}
-		});
+	const responseData = await response.json();
+	if (!(responseData.data && responseData.data.success)) {
+		throw new Error('Bad response from server.');
+	}
 };
 
 const sendSubscriptionToBackEnd = async subscription => {
-	return fetch('/api/notifications/subscribe', {
+	const response = await fetch('/api/notifications/subscribe', {
 		method: 'POST',
 		headers: {
 			'Content-Type': 'application/json'
@@ -55,23 +51,18 @@ const sendSubscriptionToBackEnd = async subscription => {
 			subscription,
 			companyName
 		})
-	})
-		.then(async response => {
-			if (!response.ok) {
-				throw new Error('Bad status code from server.');
-			}
+	});
+	if (!response.ok) {
+		throw new Error('Bad status code from server.');
+	}
 
-			const result = await response.json();
-			const id = result.data.subscriptionId;
-			console.log(`Registered subscription: ${id}`);
-			localStorage.setItem('subscriptionId', id);
-			return result;
-		})
-		.then(responseData => {
-			if (!(responseData.data && responseData.data.success)) {
-				throw new Error('Bad response from server.');
-			}
-		});
+	const responseData = await response.json();
+	const id = responseData.data.subscriptionId;
+	console.log(`Registered subscription: ${id}`);
+	localStorage.setItem('subscriptionId', id);
+	if (!(responseData.data && responseData.data.success)) {
+		throw new Error('Bad response from server.');
+	}
 };
 
 const updateSubscriptionOnServer = async subscription => {
@@ -103,38 +94,35 @@ Vue.component('notifications-button', { // eslint-disable-line no-undef
 				this.subscribeUser();
 			}
 		},
-		subscribeUser() {
+		async subscribeUser() {
 			const appServerKey = urlB64ToUint8Array(appServerPublicKey);
 
-			this.swRegistration.pushManager.subscribe({
-				userVisibleOnly: true,
-				applicationServerKey: appServerKey
-			})
-				.then(subscription => {
-					updateSubscriptionOnServer(subscription);
-					this.subscribed = true;
-					this.updateButton();
-				})
-				.catch(error => {
-					console.log('Failed to subscribe the user:', error);
-					this.updateButton();
+			try {
+				const subscription = await this.swRegistration.pushManager.subscribe({
+					userVisibleOnly: true,
+					applicationServerKey: appServerKey
 				});
+				updateSubscriptionOnServer(subscription);
+				this.subscribed = true;
+				this.updateButton();
+			} catch (error) {
+				console.log('Failed to subscribe the user:', error);
+				this.updateButton();
+			}
 		},
-		unsubscribeUser() {
-			this.swRegistration.pushManager.getSubscription()
-				.then(subscription => {
-					if (subscription) {
-						return subscription.unsubscribe();
-					}
-				})
-				.catch(error => {
-					console.log('Error unsubscribing', error);
-				})
-				.then(() => {
-					updateSubscriptionOnServer(null);
-					this.subscribed = false;
-					this.updateButton();
-				});
+		async unsubscribeUser() {
+			try {
+				const subscription = await this.swRegistration.pushManager.getSubscription();
+				if (subscription) {
+					await subscription.unsubscribe();
+				}
+			} catch (error) {
+				console.log('Error unsubscribing', error);
+			}
+
+			updateSubscriptionOnServer(null);
+			this.subscribed = false;
+			this.updateButton();
 		},
 		updateButton() {
 			if (Notification.permission === 'denied') {
@@ -148,31 +136,22 @@ Vue.component('notifications-button', { // eslint-disable-line no-undef
 			this.disabled = false;
 		}
 	},
-	created() {
+	async created() {
 		if ('serviceWorker' in navigator && 'PushManager' in window) {
 			console.log('Service Worker and Push is supported');
 
-			navigator.serviceWorker.register('/sw.js')
-				.then(swReg => {
-					console.log('Service Worker is registered', swReg);
-					this.swRegistration = swReg;
+			try {
+				const swReg = await navigator.serviceWorker.register('/sw.js');
+				console.log('Service Worker is registered', swReg);
+				this.swRegistration = swReg;
 
-					// Set the initial subscription value
-					this.swRegistration.pushManager.getSubscription().then(subscription => {
-						this.subscribed = !(subscription === null);
-
-						if (this.subscribed) {
-							console.log('User IS subscribed.');
-						} else {
-							console.log('User is NOT subscribed.');
-						}
-
-						this.updateButton();
-					});
-				})
-				.catch(error => {
-					console.error('Service Worker Error', error);
-				});
+				// Set the initial subscription value
+				const subscription = await this.swRegistration.pushManager.getSubscription();
+				this.subscribed = !(subscription === null);
+				this.updateButton();
+			}	catch (error) {
+				console.error('Service Worker Error', error);
+			}
 		} else {
 			console.warn('Push messaging is not supported');
 			this.label = 'Notifications not supported';
