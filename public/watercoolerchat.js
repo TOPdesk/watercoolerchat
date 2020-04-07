@@ -37,7 +37,7 @@ new Vue({ // eslint-disable-line no-new, no-undef
 			this.state = states.queued;
 			this.chatPartner = '';
 			this.queueId = (await this.addtoQueue(this.userName, this.companyName)).queueId;
-			window.setTimeout(() => this.searchChatPartner(this.queueId), 3000);
+			this.searchChatPartner(this.queueId);
 		},
 		async addtoQueue(userName, companyName) {
 			const subscriptionId = localStorage.getItem('subscriptionId');
