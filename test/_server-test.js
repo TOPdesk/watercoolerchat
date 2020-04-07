@@ -17,17 +17,17 @@ test('Server can be started and stopped', t => {
 	setTimeout(() => t.resolves(server.stop(), 'Graceful stop'), 100);
 });
 
-test('Assets', sub => {
+test('Assets', _t => {
 	const headers = {host: 'localhost'};
 	const {respond} = new RequestHandler();
-	sub.test('Requesting dotfiles', t => {
+	_t.test('Requesting dotfiles', t => {
 		const request = {url: '/.hidden', headers};
 		const response = new MockResponse();
 		respond(request, response);
 		t.same(response.head(), [404, 'Not Found'], 'is a 404');
 		t.end();
 	});
-	sub.test('Breaking out of public', async t => {
+	_t.test('Breaking out of public', async t => {
 		let request;
 		let response;
 
@@ -44,7 +44,7 @@ test('Assets', sub => {
 		t.same(response.head(), [404, 'Not Found'], '%2E%2E/main.js is a 404');
 		t.end();
 	});
-	sub.test('Media Types', async t => {
+	_t.test('Media Types', async t => {
 		let request;
 		let response;
 
@@ -92,7 +92,7 @@ test('Assets', sub => {
 
 		t.end();
 	});
-	sub.test('Caching', async t => {
+	_t.test('Headers', async t => {
 		let request = {url: '/favicon.ico', headers: {'if-modified-since': '3000-01-01T01:00:00.000Z', ...headers}};
 		let response = new MockResponse();
 		respond(request, response);
@@ -123,10 +123,11 @@ test('Assets', sub => {
 		t.same(response.buffer(), faviconBuffer, 'returns content when modified since');
 
 		// TODO: if-none-match
+		// TODO: test encoding?
 
 		t.end();
 	});
-	sub.end();
+	_t.end();
 });
 
 function MockResponse() {
@@ -134,10 +135,10 @@ function MockResponse() {
 	const head = [];
 	const headers = {};
 	let buffer = Buffer.from([]);
-	let _resolve = null;
+	let finishedCallback = null;
 
 	stream.finished = new Promise(resolve => {
-		_resolve = resolve;
+		finishedCallback = resolve;
 	});
 	stream.head = () => Object.freeze(head);
 	stream.headers = () => Object.freeze(headers);
@@ -146,7 +147,7 @@ function MockResponse() {
 	};
 
 	stream._end = stream.end;
-	stream.end = (chunk, encoding) => stream._end(chunk, encoding, _resolve);
+	stream.end = (chunk, encoding) => stream._end(chunk, encoding, finishedCallback);
 	stream.buffer = () => Buffer.from(buffer);
 	stream.setHeader = (header, value) => {
 		headers[header] = value;
