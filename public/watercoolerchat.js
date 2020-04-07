@@ -23,6 +23,16 @@ new Vue({ // eslint-disable-line no-new, no-undef
 			state: states.notInQueue
 		};
 	},
+	mounted() {
+		if (localStorage.name) {
+			this.userName = localStorage.name;
+		}
+	},
+	watch: {
+		userName(newName) {
+			localStorage.name = newName;
+		}
+	},
 	methods: {
 		async enterQueue() {
 			this.state = states.queued;
