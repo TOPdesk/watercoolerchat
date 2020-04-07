@@ -12,11 +12,11 @@ new Vue({ // eslint-disable-line no-new, no-undef
 	el: '#app',
 	data() {
 		const url = window.location.href.replace(/\/$/, '');
-		const name = url.slice(url.lastIndexOf('/') + 1);
+		const companyName = url.slice(url.lastIndexOf('/') + 1);
 
 		return {
 			features: [],
-			companyName: name,
+			companyName,
 			userName: '',
 			queueId: '',
 			chatPartner: '',
