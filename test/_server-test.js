@@ -112,7 +112,7 @@ test('Assets', sub => {
 		respond(request, response);
 		await response.finished;
 		t.match(response.headers(), {'Last-Modified': faviconMtime}, 'response has Last Modified header set');
-		t.match(response.headers(), {'ETag': faviconHash}, 'response has Etag header set');
+		t.match(response.headers(), {ETag: faviconHash}, 'response has Etag header set');
 		t.match(response.headers(), {'Cache-Control': 'max-age=0, private'}, 'response has Cache Control header set');
 		t.same(response.buffer(), faviconBuffer, 'returns content when no If-Modified-Since heder was sent');
 
