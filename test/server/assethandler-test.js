@@ -2,12 +2,13 @@ import tap from 'tap';
 import {promises as fsPromises} from 'fs';
 import {Writable} from 'stream';
 import {createHash} from 'crypto';
-import {handleRequest as respond} from '../../lib/server/asset.js';
+import {AssetHandler} from '../../lib/server/assethandler.js';
 
 const {test} = tap;
 const {stat, readFile} = fsPromises;
 
 const headers = {host: 'localhost'};
+const {handleRequest: respond} = new AssetHandler();
 
 test('Requesting dotfiles', t => {
 	const request = {url: '/.hidden', headers};

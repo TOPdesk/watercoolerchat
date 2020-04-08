@@ -4,12 +4,8 @@ import {Router} from '../../lib/server/router.js';
 const {test} = tap;
 
 const router = new Router({
-	api: (request, response) => {
-		response.api = true;
-	},
-	asset: (request, response) => {
-		response.asset = true;
-	}
+	api: new MockApiRequest(),
+	asset: new MockAssetRequest()
 });
 
 test('API calls', t => {
@@ -29,3 +25,19 @@ test('Asset calls', t => {
 	t.true(response.asset, 'trigger Asset handler');
 	t.end();
 });
+
+function MockAssetRequest() {
+	return {
+		handleRequest: (request, response) => {
+			response.asset = true;
+		}
+	};
+}
+
+function MockApiRequest() {
+	return {
+		handleRequest: (request, response) => {
+			response.api = true;
+		}
+	};
+}
