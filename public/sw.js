@@ -9,7 +9,7 @@ self.addEventListener('push', event => {
 		data: {
 			companyName
 		},
-		icon: 'watercoolerchat.svg'
+		icon: 'notification-icon.png'
 	};
 
 	event.waitUntil(self.registration.showNotification(title, options));
