@@ -31,7 +31,8 @@ const sendUnsubscribeToBackEnd = async subscriptionId => {
 			'Content-Type': 'application/json'
 		},
 		body: JSON.stringify({
-			subscriptionId
+			subscriptionId,
+			companyName
 		})
 	});
 	if (!response.ok) {
@@ -42,15 +43,18 @@ const sendUnsubscribeToBackEnd = async subscriptionId => {
 	if (!(responseData.data && responseData.data.success)) {
 		throw new Error('Bad response from server.');
 	}
+
+	return responseData;
 };
 
-const sendSubscriptionToBackEnd = async subscription => {
+const sendSubscriptionToBackEnd = async (subscriptionId, subscription) => {
 	const response = await fetch('/api/notifications/subscribe', {
 		method: 'POST',
 		headers: {
 			'Content-Type': 'application/json'
 		},
 		body: JSON.stringify({
+			subscriptionId,
 			subscription,
 			companyName
 		})
@@ -60,23 +64,11 @@ const sendSubscriptionToBackEnd = async subscription => {
 	}
 
 	const responseData = await response.json();
-	const id = responseData.data.subscriptionId;
-	console.log(`Registered subscription: ${id}`);
-	localStorage.setItem('subscriptionId', id);
 	if (!(responseData.data && responseData.data.success)) {
 		throw new Error('Bad response from server.');
 	}
-};
 
-const updateSubscriptionOnServer = async subscription => {
-	const subscriptionId = localStorage.getItem('subscriptionId');
-	if (subscription !== null) {
-		await sendSubscriptionToBackEnd(subscription);
-	} else if (subscriptionId !== null) {
-		console.log(`Removing subscription: ${subscriptionId}`);
-		await sendUnsubscribeToBackEnd(subscriptionId);
-		localStorage.removeItem('subscriptionId');
-	}
+	return responseData.data.subscriptionId;
 };
 
 Vue.component('notifications-button', { // eslint-disable-line no-undef
@@ -85,8 +77,20 @@ Vue.component('notifications-button', { // eslint-disable-line no-undef
 			swRegistration: null,
 			label: 'Notify me when somebody is at the online watercooler',
 			disabled: false,
-			subscribed: false
+			subscribed: false,
+			subscription: null,
+			subscriptionId: null
 		};
+	},
+	mounted() {
+		if (localStorage.subscriptionId) {
+			this.subscriptionId = localStorage.subscriptionId;
+		}
+	},
+	watch: {
+		subscriptionId(newSubscriptionId) {
+			localStorage.subscriptionId = newSubscriptionId;
+		}
 	},
 	methods: {
 		toggleNotifications() {
@@ -99,11 +103,16 @@ Vue.component('notifications-button', { // eslint-disable-line no-undef
 		},
 		async subscribeUser() {
 			try {
-				const subscription = await this.swRegistration.pushManager.subscribe({
-					userVisibleOnly: true,
-					applicationServerKey: appServerKey
-				});
-				updateSubscriptionOnServer(subscription);
+				if (this.subscription === null) {
+					this.subscription = await this.swRegistration.pushManager.subscribe({
+						userVisibleOnly: true,
+						applicationServerKey: appServerKey
+					});
+				}
+
+				const id = await sendSubscriptionToBackEnd(this.subscriptionId, this.subscription);
+				console.log(`Registered subscription: ${id}`);
+				this.subscriptionId = id;
 				this.subscribed = true;
 				this.updateButton();
 			} catch (error) {
@@ -113,24 +122,31 @@ Vue.component('notifications-button', { // eslint-disable-line no-undef
 		},
 		async unsubscribeUser() {
 			try {
-				const subscription = await this.swRegistration.pushManager.getSubscription();
-				if (subscription) {
-					await subscription.unsubscribe();
+				const unsubscription = await sendUnsubscribeToBackEnd(this.subscriptionId);
+				if (unsubscription.removeSubscription && this.subscription) {
+					console.log('Removing subscription');
+					await this.subscription.unsubscribe();
 				}
+
+				console.log(`Removing subscription: ${this.subscriptionId}`);
 			} catch (error) {
 				console.log('Error unsubscribing', error);
 			}
 
-			updateSubscriptionOnServer(null);
 			this.subscribed = false;
 			this.updateButton();
 		},
-		updateButton() {
+		async updateButton() {
 			if (Notification.permission === 'denied') {
 				this.label = 'Notification blocked, please allow us to send your browser notifications';
 				this.subscribed = false;
 				this.disabled = true;
-				updateSubscriptionOnServer(null);
+
+				if (this.subscriptionId) {
+					await sendUnsubscribeToBackEnd(this.subscriptionId);
+					this.subscriptionId = null;
+				}
+
 				return;
 			}
 
@@ -147,8 +163,15 @@ Vue.component('notifications-button', { // eslint-disable-line no-undef
 				this.swRegistration = swReg;
 
 				// Set the initial subscription value
-				const subscription = await this.swRegistration.pushManager.getSubscription();
-				this.subscribed = !(subscription === null);
+				this.subscription = await this.swRegistration.pushManager.getSubscription();
+				if (this.subscription !== null && this.subscriptionId !== null) {
+					const response = await fetch(`/api/notifications/${this.subscriptionId}`);
+					if (response.status >= 200 && response.status < 300) {
+						const json = await response.json();
+						this.subscribed = (json && json.validFor && json.validFor.includes(companyName));
+					}
+				}
+
 				this.updateButton();
 			}	catch (error) {
 				console.error('Service Worker Error', error);
