@@ -166,38 +166,34 @@ function MockResponse() {
 	let buffer = Buffer.from([]);
 	let finishedCallback = null;
 
-	stream.finished = new Promise(resolve => {
-		finishedCallback = resolve;
-	});
-	stream.head = () => Object.freeze(head);
-	stream.headers = () => Object.freeze(headers);
-	stream.write = chunk => {
-		if (typeof chunk === 'string') {
-			if (typeof buffer === 'string') {
-				buffer += chunk;
+	stream._end = stream.end;
+	return Object.assign(stream, {
+		finished: new Promise(resolve => {
+			finishedCallback = resolve;
+		}),
+		head: () => Object.freeze(head),
+		headers: () => Object.freeze(headers),
+		setHeader: (header, value) => {
+			headers[header] = value;
+		},
+		writeHead: (code, message) => {
+			head.push(code);
+			head.push(message);
+		},
+		buffer: () => Buffer.from(buffer),
+		end: (chunk, encoding) => stream._end(chunk, encoding, finishedCallback),
+		write: chunk => {
+			if (typeof chunk === 'string') {
+				if (typeof buffer === 'string') {
+					buffer += chunk;
+					return;
+				}
+
+				buffer = chunk;
 				return;
 			}
 
-			buffer = chunk;
-			return;
+			buffer = Buffer.concat([buffer, chunk]);
 		}
-
-		buffer = Buffer.concat([buffer, chunk]);
-	};
-
-	stream.buffer = () => Buffer.from(buffer);
-
-	stream._end = stream.end;
-	stream.end = (chunk, encoding) => stream._end(chunk, encoding, finishedCallback);
-
-	stream.setHeader = (header, value) => {
-		headers[header] = value;
-	};
-
-	stream.writeHead = (code, message) => {
-		head.push(code);
-		head.push(message);
-	};
-
-	return stream;
+	});
 }
