@@ -1,27 +1,98 @@
 import tap from 'tap';
+import {PassThrough} from 'stream';
 import {ApiHandler} from '../../lib/server/apihandler.js';
 
 const {test} = tap;
 
 const headers = {host: 'localhost'};
-const {handleRequest: respond} = new ApiHandler({features: ['feature1', 'feature2']});
+const requestParameters = {headers, method: 'GET'};
+const {handleRequest: respond} = new ApiHandler({features: ['feature1', 'feature2'], queue: new MockQueue()});
 
-test('/notapi', t => {
-	const request = {url: '/notapi', headers};
+test('/notapi', async t => {
+	const request = new MockRequest({url: '/notapi', headers});
 	const response = new MockResponse();
 	respond(request, response);
+	await response.finished;
 	t.same(response.head(), [404, 'Not Found'], 'is a 404');
 	t.end();
 });
 
 test('/api/features/enabled', async t => {
-	const request = {url: '/api/features/enabled', headers};
+	const request = new MockRequest({url: '/api/features/enabled', ...requestParameters});
 	const response = new MockResponse();
 	respond(request, response);
 	await response.finished;
 	t.same(response.result(), {features: ['feature1', 'feature2']}, 'returns active features');
 	t.end();
 });
+
+test('/api/queue', async t => {
+	let request = new MockRequest({url: '/api/queue', ...requestParameters});
+	let response = new MockResponse();
+	respond(request, response);
+	await response.finished;
+	t.same(response.head(), [405, 'Method Not Allowed'], 'responds 405 to GET');
+
+	request = new MockRequest({url: '/api/queue', ...requestParameters, method: 'HEAD'});
+	response = new MockResponse();
+	respond(request, response);
+	await response.finished;
+	t.same(response.head(), [405, 'Method Not Allowed'], 'responds 405 to HEAD');
+
+	request = new MockRequest({url: '/api/queue', ...requestParameters, method: 'POST'});
+	response = new MockResponse();
+	respond(request, response);
+	await response.finished;
+	t.same(response.head(), [405, 'Method Not Allowed'], 'responds 405 to POST');
+
+	request = new MockRequest({url: '/api/queue', ...requestParameters, method: 'DELETE'});
+	response = new MockResponse();
+	respond(request, response);
+	await response.finished;
+	t.same(response.head(), [405, 'Method Not Allowed'], 'responds 405 to DELETE');
+
+	// TODO: test content type
+
+	request = new MockRequest({url: '/api/queue', ...requestParameters, method: 'PUT'});
+	response = new MockResponse();
+	respond(request, response);
+	await response.finished;
+	t.same(response.head(), [411, 'Length Required'], 'responds 411 to PUT without Content-Length');
+
+	request = new MockRequest(
+		{url: '/api/queue', ...requestParameters, method: 'PUT', headers: {...headers, 'content-length': 1}},
+		[],
+		false
+	);
+	response = new MockResponse();
+	respond(request, response);
+	await response.finished;
+	t.same(response.head(), [400, 'Bad Request'], 'responds 400 to PUT with bad Content-Length');
+
+	const payload = {userName: 'user', companyName: 'company', subscriptionId: '1234'};
+	const payloadLength = JSON.stringify(payload).length;
+	request = new MockRequest(
+		{url: '/api/queue', ...requestParameters, method: 'PUT', headers: {...headers, 'content-length': payloadLength}},
+		payload
+	);
+	response = new MockResponse();
+	respond(request, response);
+	await response.finished;
+	t.same(response.result(), {userName: 'user', companyName: 'company', queueId: '4321'}, 'responds with answer from Queue.add');
+	t.end();
+});
+
+function MockRequest(fields, object, complete = true) {
+	const stream = new PassThrough();
+	if (object) {
+		stream.end(JSON.stringify(object), 'utf8');
+	} else {
+		stream.end();
+	}
+
+	const request = {...fields, complete};
+	return Object.assign(stream, {...request});
+}
 
 function MockResponse() {
 	const head = [];
@@ -30,7 +101,7 @@ function MockResponse() {
 	let encoding;
 	let finishedCallback;
 
-	return {
+	const response = {
 		writeHead: (code, message) => {
 			head.push(code);
 			head.push(message);
@@ -56,5 +127,18 @@ function MockResponse() {
 		finished: new Promise(resolve => {
 			finishedCallback = resolve;
 		})
+	};
+	return response;
+}
+
+function MockQueue() {
+	return {
+		add: ({userName, companyName, subscriptionId}) => {
+			return {
+				queueId: subscriptionId.split('').reverse().join(''),
+				userName,
+				companyName
+			};
+		}
 	};
 }
