@@ -12,6 +12,6 @@ export const redirectToHttps = () => {
 };
 
 export const getCompanyNameFromUrl = () => {
-	const url = window.location.href.replace(/\/$/, '');
+	const url = window.location.pathname.replace(/\/$/, '');
 	return decodeURIComponent(url.slice(url.lastIndexOf('/') + 1));
 };

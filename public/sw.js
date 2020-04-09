@@ -22,7 +22,7 @@ self.addEventListener('notificationclick', event => {
 	if (action === 'close') {
 		notification.close();
 	} else {
-		clients.openWindow(`https://have-a.watercoolerchat.online/at/${companyName}`); // eslint-disable-line no-undef
+		clients.openWindow(`https://have-a.watercoolerchat.online/at/${companyName}/?ref=notification`); // eslint-disable-line no-undef
 		notification.close();
 	}
 });
