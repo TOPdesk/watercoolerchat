@@ -6,7 +6,8 @@ const {test} = tap;
 
 const headers = {host: 'localhost'};
 const requestParameters = {headers, method: 'GET'};
-const {handleRequest: respond} = new ApiHandler({features: ['feature1', 'feature2'], queue: new MockQueue()});
+const notifications = new MockNotifications();
+const {handleRequest: respond} = new ApiHandler({features: ['feature1', 'feature2'], queue: new MockQueue(), notifications});
 
 test('/notapi', async t => {
 	const request = new MockRequest({url: '/notapi', headers});
@@ -155,17 +156,72 @@ test('/api/match', async t => {
 	await response.finished;
 	t.same(response.head(), [404, 'Not Found'], 'responds 404 to GET without QueueId');
 
+	request = new MockRequest({url: '/api/match/notfound', ...requestParameters});
+	response = new MockResponse();
+	respond(request, response);
+	await response.finished;
+	t.same(response.head(), [404, 'Not Found'], 'responds 404 to GET with non-existing QueueId');
+
 	request = new MockRequest({url: '/api/match/myid', ...requestParameters});
 	response = new MockResponse();
 	respond(request, response);
 	await response.finished;
 	t.same(response.result(), {matchResult: 'myid', chatUrl: 'url', chatPartner: 'partner'}, 'responds with answer from Queue.findMatch');
 
-	request = new MockRequest({url: '/api/match/notfound', ...requestParameters});
+	t.end();
+});
+
+test('/api/notifications', async t => {
+	notifications._disable();
+	let request = new MockRequest({url: '/api/notifications/', ...requestParameters});
+	let response = new MockResponse();
+	respond(request, response);
+	await response.finished;
+	t.same(response.head(), [404, 'Not Found'], 'responds 404 if Notifiations are disabled');
+
+	notifications._enable();
+
+	request = new MockRequest({url: '/api/notifications/', ...requestParameters, method: 'HEAD'});
 	response = new MockResponse();
 	respond(request, response);
 	await response.finished;
-	t.same(response.head(), [404, 'Not Found'], 'responds 404 to GET with non-existing QueueId');
+	t.same(response.head(), [405, 'Method Not Allowed'], 'responds 405 to HEAD');
+
+	request = new MockRequest({url: '/api/notifications/', ...requestParameters, method: 'PUT'});
+	response = new MockResponse();
+	respond(request, response);
+	await response.finished;
+	t.same(response.head(), [405, 'Method Not Allowed'], 'responds 405 to PUT');
+
+	request = new MockRequest({url: '/api/notifications/', ...requestParameters, method: 'POST'});
+	response = new MockResponse();
+	respond(request, response);
+	await response.finished;
+	t.same(response.head(), [405, 'Method Not Allowed'], 'responds 405 to POST');
+
+	request = new MockRequest({url: '/api/notifications/', ...requestParameters, method: 'DELETE'});
+	response = new MockResponse();
+	respond(request, response);
+	await response.finished;
+	t.same(response.head(), [405, 'Method Not Allowed'], 'responds 405 to DELETE');
+
+	request = new MockRequest({url: '/api/notifications/', ...requestParameters});
+	response = new MockResponse();
+	respond(request, response);
+	await response.finished;
+	t.same(response.head(), [404, 'Not Found'], 'responds 404 to GET without SubscriptionId');
+
+	request = new MockRequest({url: '/api/notifications/notfound', ...requestParameters});
+	response = new MockResponse();
+	respond(request, response);
+	await response.finished;
+	t.same(response.head(), [404, 'Not Found'], 'responds 404 to GET with non-existing SubscriptionId');
+
+	request = new MockRequest({url: '/api/notifications/myid', ...requestParameters});
+	response = new MockResponse();
+	respond(request, response);
+	await response.finished;
+	t.same(response.result(), {validFor: ['myid']}, 'responds with answer from Notifications.get');
 
 	t.end();
 });
@@ -236,6 +292,24 @@ function MockQueue() {
 					chatUrl: 'url',
 					chatPartner: 'partner'
 				};
+		}
+	};
+}
+
+function MockNotifications() {
+	let _enabled = true;
+	return {
+		enabled: () => _enabled,
+		get: subscriptionId => {
+			return subscriptionId === 'notfound'
+				? false
+				: {validFor: [subscriptionId]};
+		},
+		_disable: () => {
+			_enabled = false;
+		},
+		_enable: () => {
+			_enabled = true;
 		}
 	};
 }
