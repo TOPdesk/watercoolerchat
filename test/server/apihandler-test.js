@@ -124,6 +124,52 @@ test('/api/queue', async t => {
 	t.end();
 });
 
+test('/api/match', async t => {
+	let request = new MockRequest({url: '/api/match/', ...requestParameters, method: 'HEAD'});
+	let response = new MockResponse();
+	respond(request, response);
+	await response.finished;
+	t.same(response.head(), [405, 'Method Not Allowed'], 'responds 405 to HEAD');
+
+	request = new MockRequest({url: '/api/match/', ...requestParameters, method: 'POST'});
+	response = new MockResponse();
+	respond(request, response);
+	await response.finished;
+	t.same(response.head(), [405, 'Method Not Allowed'], 'responds 405 to POST');
+
+	request = new MockRequest({url: '/api/match/', ...requestParameters, method: 'PUT'});
+	response = new MockResponse();
+	respond(request, response);
+	await response.finished;
+	t.same(response.head(), [405, 'Method Not Allowed'], 'responds 405 to PUT');
+
+	request = new MockRequest({url: '/api/match/', ...requestParameters, method: 'DELETE'});
+	response = new MockResponse();
+	respond(request, response);
+	await response.finished;
+	t.same(response.head(), [405, 'Method Not Allowed'], 'responds 405 to DELETE');
+
+	request = new MockRequest({url: '/api/match/', ...requestParameters});
+	response = new MockResponse();
+	respond(request, response);
+	await response.finished;
+	t.same(response.head(), [404, 'Not Found'], 'responds 404 to GET without QueueId');
+
+	request = new MockRequest({url: '/api/match/myid', ...requestParameters});
+	response = new MockResponse();
+	respond(request, response);
+	await response.finished;
+	t.same(response.result(), {matchResult: 'myid', chatUrl: 'url', chatPartner: 'partner'}, 'responds with answer from Queue.findMatch');
+
+	request = new MockRequest({url: '/api/match/notfound', ...requestParameters});
+	response = new MockResponse();
+	respond(request, response);
+	await response.finished;
+	t.same(response.head(), [404, 'Not Found'], 'responds 404 to GET with non-existing QueueId');
+
+	t.end();
+});
+
 function MockRequest(fields, object, complete = true) {
 	const stream = new PassThrough();
 	if (object) {
@@ -181,6 +227,15 @@ function MockQueue() {
 				userName,
 				companyName
 			};
+		},
+		findMatch: queueId => {
+			return queueId === 'notfound'
+				? false
+				: {
+					matchResult: queueId,
+					chatUrl: 'url',
+					chatPartner: 'partner'
+				};
 		}
 	};
 }
