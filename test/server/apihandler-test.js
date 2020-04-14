@@ -75,8 +75,6 @@ test('/api/queue', async t => {
 	await response.finished;
 	t.same(response.head(), [405, 'Method Not Allowed'], 'responds 405 to DELETE');
 
-	// TODO: test content type
-
 	request = new MockRequest({url: '/api/queue', ...requestParameters, method: 'PUT'});
 	response = new MockResponse();
 	respond(request, response);
@@ -84,7 +82,7 @@ test('/api/queue', async t => {
 	t.same(response.head(), [411, 'Length Required'], 'responds 411 to PUT without Content-Length');
 
 	request = new MockRequest(
-		{url: '/api/queue', ...requestParameters, method: 'PUT', headers: {...headers, 'content-length': 1}},
+		{url: '/api/queue', ...requestParameters, method: 'PUT', headers: {...headers, 'content-length': 1, 'content-type': 'application/javascript; charset=utf-8'}},
 		[],
 		false
 	);
@@ -97,6 +95,26 @@ test('/api/queue', async t => {
 	const payloadLength = JSON.stringify(payload).length;
 	request = new MockRequest(
 		{url: '/api/queue', ...requestParameters, method: 'PUT', headers: {...headers, 'content-length': payloadLength}},
+		[],
+		false
+	);
+	response = new MockResponse();
+	respond(request, response);
+	await response.finished;
+	t.same(response.head(), [415, 'Unsupported Media Type'], 'responds 415 to PUT with missing Content Type');
+
+	request = new MockRequest(
+		{url: '/api/queue', ...requestParameters, method: 'PUT', headers: {...headers, 'content-length': payloadLength, 'content-type': 'application/xml'}},
+		[],
+		false
+	);
+	response = new MockResponse();
+	respond(request, response);
+	await response.finished;
+	t.same(response.head(), [415, 'Unsupported Media Type'], 'responds 415 to PUT with invalid Content Type');
+
+	request = new MockRequest(
+		{url: '/api/queue', ...requestParameters, method: 'PUT', headers: {...headers, 'content-length': payloadLength, 'content-type': 'application/javascript'}},
 		payload
 	);
 	response = new MockResponse();
