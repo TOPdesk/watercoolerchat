@@ -18,8 +18,32 @@ test('/notapi', async t => {
 });
 
 test('/api/features/enabled', async t => {
-	const request = new MockRequest({url: '/api/features/enabled', ...requestParameters});
-	const response = new MockResponse();
+	let request = new MockRequest({url: '/api/features/enabled', ...requestParameters, method: 'HEAD'});
+	let response = new MockResponse();
+	respond(request, response);
+	await response.finished;
+	t.same(response.head(), [405, 'Method Not Allowed'], 'responds 405 to HEAD');
+
+	request = new MockRequest({url: '/api/features/enabled', ...requestParameters, method: 'PUT'});
+	response = new MockResponse();
+	respond(request, response);
+	await response.finished;
+	t.same(response.head(), [405, 'Method Not Allowed'], 'responds 405 to PUT');
+
+	request = new MockRequest({url: '/api/features/enabled', ...requestParameters, method: 'POST'});
+	response = new MockResponse();
+	respond(request, response);
+	await response.finished;
+	t.same(response.head(), [405, 'Method Not Allowed'], 'responds 405 to POST');
+
+	request = new MockRequest({url: '/api/features/enabled', ...requestParameters, method: 'DELETE'});
+	response = new MockResponse();
+	respond(request, response);
+	await response.finished;
+	t.same(response.head(), [405, 'Method Not Allowed'], 'responds 405 to DELETE');
+
+	request = new MockRequest({url: '/api/features/enabled', ...requestParameters});
+	response = new MockResponse();
 	respond(request, response);
 	await response.finished;
 	t.same(response.result(), {features: ['feature1', 'feature2']}, 'returns active features');
