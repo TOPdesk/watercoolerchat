@@ -223,6 +223,111 @@ test('/api/notifications', async t => {
 	await response.finished;
 	t.same(response.result(), {validFor: ['myid']}, 'responds with answer from Notifications.get');
 
+	t.test('subscribe', async _t => {
+		notifications._disable();
+		request = new MockRequest({url: '/api/notifications/subscribe', ...requestParameters});
+		response = new MockResponse();
+		respond(request, response);
+		await response.finished;
+		_t.same(response.head(), [404, 'Not Found'], 'responds 404 if Notifiations are disabled');
+
+		notifications._enable();
+		request = new MockRequest({url: '/api/notifications/subscribe', ...requestParameters, method: 'HEAD'});
+		response = new MockResponse();
+		respond(request, response);
+		await response.finished;
+		_t.same(response.head(), [405, 'Method Not Allowed'], 'responds 405 to HEAD');
+
+		request = new MockRequest({url: '/api/notifications/subscribe', ...requestParameters, method: 'PUT'});
+		response = new MockResponse();
+		respond(request, response);
+		await response.finished;
+		_t.same(response.head(), [405, 'Method Not Allowed'], 'responds 405 to PUT');
+
+		request = new MockRequest({url: '/api/notifications/subscribe', ...requestParameters, method: 'GET'});
+		response = new MockResponse();
+		respond(request, response);
+		await response.finished;
+		_t.same(response.head(), [405, 'Method Not Allowed'], 'responds 405 to GET');
+
+		request = new MockRequest({url: '/api/notifications/subscribe', ...requestParameters, method: 'DELETE'});
+		response = new MockResponse();
+		respond(request, response);
+		await response.finished;
+		_t.same(response.head(), [405, 'Method Not Allowed'], 'responds 405 to DELETE');
+
+		request = new MockRequest({url: '/api/notifications/subscribe', ...requestParameters, method: 'POST'});
+		response = new MockResponse();
+		respond(request, response);
+		await response.finished;
+		_t.same(response.head(), [411, 'Length Required'], 'responds 411 to POST without Content-Length');
+
+		request = new MockRequest(
+			{url: '/api/notifications/subscribe', ...requestParameters, method: 'POST', headers: {...headers, 'content-length': 1, 'content-type': 'application/javascript; charset=utf-8'}},
+			[],
+			false
+		);
+		response = new MockResponse();
+		respond(request, response);
+		await response.finished;
+		_t.same(response.head(), [400, 'Bad Request'], 'responds 400 to POST with bad Content-Length');
+
+		let payload = {companyName: 'company', subscription: {}, subscriptionId: '1234'};
+		let payloadLength = JSON.stringify(payload).length;
+		request = new MockRequest(
+			{url: '/api/notifications/subscribe', ...requestParameters, method: 'POST', headers: {...headers, 'content-length': payloadLength}},
+			[],
+			false
+		);
+		response = new MockResponse();
+		respond(request, response);
+		await response.finished;
+		_t.same(response.head(), [415, 'Unsupported Media Type'], 'responds 415 to POST with missing Content Type');
+
+		request = new MockRequest(
+			{url: '/api/notifications/subscribe', ...requestParameters, method: 'POST', headers: {...headers, 'content-length': payloadLength, 'content-type': 'application/xml'}},
+			[],
+			false
+		);
+		response = new MockResponse();
+		respond(request, response);
+		await response.finished;
+		_t.same(response.head(), [415, 'Unsupported Media Type'], 'responds 415 to POST with invalid Content Type');
+
+		request = new MockRequest(
+			{url: '/api/notifications/subscribe', ...requestParameters, method: 'POST', headers: {...headers, 'content-length': payloadLength, 'content-type': 'application/javascript'}},
+			payload
+		);
+		response = new MockResponse();
+		respond(request, response);
+		await response.finished;
+		_t.same(response.head(), [400, 'Bad Request'], 'responds 400 to POST with bad Subscription data');
+
+		payload = {companyName: 'company', subscription: {endpoint: 'endpoint'}, subscriptionId: 'fail'};
+		payloadLength = JSON.stringify(payload).length;
+		request = new MockRequest(
+			{url: '/api/notifications/subscribe', ...requestParameters, method: 'POST', headers: {...headers, 'content-length': payloadLength, 'content-type': 'application/javascript'}},
+			payload
+		);
+		response = new MockResponse();
+		respond(request, response);
+		await response.finished;
+		_t.same(response.head(), [500, 'Internal Server Error'], 'responds 500 to POST with failed Subscription subscription');
+
+		payload = {companyName: 'company', subscription: {endpoint: 'endpoint'}, subscriptionId: '1234'};
+		payloadLength = JSON.stringify(payload).length;
+		request = new MockRequest(
+			{url: '/api/notifications/subscribe', ...requestParameters, method: 'POST', headers: {...headers, 'content-length': payloadLength, 'content-type': 'application/javascript'}},
+			payload
+		);
+		response = new MockResponse();
+		respond(request, response);
+		await response.finished;
+		_t.same(response.result(), {data: {success: true, subscriptionId: '1234'}, subscription: {endpoint: 'endpoint'}, companyName: 'company'}, 'responds with answer from Notifications.subscribe');
+
+		_t.end();
+	});
+
 	t.end();
 });
 
@@ -304,6 +409,17 @@ function MockNotifications() {
 			return subscriptionId === 'notfound'
 				? false
 				: {validFor: [subscriptionId]};
+		},
+		subscribe: ({subscriptionId, subscription, companyName}) => {
+			if (subscriptionId === 'fail') {
+				return false;
+			}
+
+			return {
+				data: {success: true, subscriptionId},
+				subscription,
+				companyName
+			};
 		},
 		_disable: () => {
 			_enabled = false;
