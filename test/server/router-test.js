@@ -26,6 +26,16 @@ test('Asset calls', t => {
 	t.end();
 });
 
+test('Company calls', t => {
+	const request = {url: '/at/somecompany/'};
+	const response = {api: false, asset: false};
+	router.handle(request, response);
+	t.false(response.api, 'do not trigger API handler');
+	t.true(response.asset, 'trigger Asset handler');
+	t.same(request.url, '/company.html', 'changes request to /company.html');
+	t.end();
+});
+
 function MockAssetRequest() {
 	return {
 		handleRequest: (request, response) => {
@@ -38,6 +48,7 @@ function MockApiRequest() {
 	return {
 		handleRequest: (request, response) => {
 			response.api = true;
+			response.url = request.url;
 		}
 	};
 }
