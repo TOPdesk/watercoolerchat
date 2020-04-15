@@ -7,7 +7,8 @@ const {test} = tap;
 const headers = {host: 'localhost'};
 const requestParameters = {headers, method: 'GET'};
 const notifications = new MockNotifications();
-const {handleRequest: respond} = new ApiHandler({features: ['feature1', 'feature2'], queue: new MockQueue(), notifications});
+const metrics = new MockMetrics();
+const {handleRequest: respond} = new ApiHandler({features: ['feature1', 'feature2'], queue: new MockQueue(), notifications, metrics});
 
 test('/notapi', async t => {
 	const request = new MockRequest({url: '/notapi', headers});
@@ -299,12 +300,15 @@ test('/api/notifications', async t => {
 			payload
 		);
 		response = new MockResponse();
+		metrics.reset();
 		respond(request, response);
 		await response.finished;
 		_t.same(response.head(), [400, 'Bad Request'], 'responds 400 to POST with bad Subscription data');
+		_t.same(metrics.calls(), ['notifications.failures.invalidsubscriberequest'], 'Metric notifications.failures.invalidsubscriberequest incremented');
 
 		payload = {companyName: 'company', subscription: {endpoint: 'endpoint'}, subscriptionId: 'fail'};
 		payloadLength = JSON.stringify(payload).length;
+		metrics.reset();
 		request = new MockRequest(
 			{url: '/api/notifications/subscribe', ...requestParameters, method: 'POST', headers: {...headers, 'content-length': payloadLength, 'content-type': 'application/javascript'}},
 			payload
@@ -313,9 +317,11 @@ test('/api/notifications', async t => {
 		respond(request, response);
 		await response.finished;
 		_t.same(response.head(), [500, 'Internal Server Error'], 'responds 500 to POST with failed Subscription subscription');
+		_t.same(metrics.calls(), ['notifications.failures.notsavedtodatabase'], 'Metric notifications.failures.notsavedtodatabase incremented');
 
 		payload = {companyName: 'company', subscription: {endpoint: 'endpoint'}, subscriptionId: '1234'};
 		payloadLength = JSON.stringify(payload).length;
+		metrics.reset();
 		request = new MockRequest(
 			{url: '/api/notifications/subscribe', ...requestParameters, method: 'POST', headers: {...headers, 'content-length': payloadLength, 'content-type': 'application/javascript'}},
 			payload
@@ -324,6 +330,115 @@ test('/api/notifications', async t => {
 		respond(request, response);
 		await response.finished;
 		_t.same(response.result(), {data: {success: true, subscriptionId: '1234'}, subscription: {endpoint: 'endpoint'}, companyName: 'company'}, 'responds with answer from Notifications.subscribe');
+		_t.same(metrics.calls(), ['notifications.subscriptions'], 'Metric notifications.subscriptions incremented');
+		_t.end();
+	});
+
+	t.test('unsubscribe', async _t => {
+		notifications._disable();
+		request = new MockRequest({url: '/api/notifications/unsubscribe', ...requestParameters});
+		response = new MockResponse();
+		respond(request, response);
+		await response.finished;
+		_t.same(response.head(), [404, 'Not Found'], 'responds 404 if Notifiations are disabled');
+
+		notifications._enable();
+		request = new MockRequest({url: '/api/notifications/unsubscribe', ...requestParameters, method: 'HEAD'});
+		response = new MockResponse();
+		respond(request, response);
+		await response.finished;
+		_t.same(response.head(), [405, 'Method Not Allowed'], 'responds 405 to HEAD');
+
+		request = new MockRequest({url: '/api/notifications/unsubscribe', ...requestParameters, method: 'PUT'});
+		response = new MockResponse();
+		respond(request, response);
+		await response.finished;
+		_t.same(response.head(), [405, 'Method Not Allowed'], 'responds 405 to PUT');
+
+		request = new MockRequest({url: '/api/notifications/unsubscribe', ...requestParameters, method: 'GET'});
+		response = new MockResponse();
+		respond(request, response);
+		await response.finished;
+		_t.same(response.head(), [405, 'Method Not Allowed'], 'responds 405 to GET');
+
+		request = new MockRequest({url: '/api/notifications/unsubscribe', ...requestParameters, method: 'DELETE'});
+		response = new MockResponse();
+		respond(request, response);
+		await response.finished;
+		_t.same(response.head(), [405, 'Method Not Allowed'], 'responds 405 to DELETE');
+
+		request = new MockRequest({url: '/api/notifications/unsubscribe', ...requestParameters, method: 'POST'});
+		response = new MockResponse();
+		respond(request, response);
+		await response.finished;
+		_t.same(response.head(), [411, 'Length Required'], 'responds 411 to POST without Content-Length');
+
+		request = new MockRequest(
+			{url: '/api/notifications/unsubscribe', ...requestParameters, method: 'POST', headers: {...headers, 'content-length': 1, 'content-type': 'application/javascript; charset=utf-8'}},
+			[],
+			false
+		);
+		response = new MockResponse();
+		respond(request, response);
+		await response.finished;
+		_t.same(response.head(), [400, 'Bad Request'], 'responds 400 to POST with bad Content-Length');
+
+		let payload = {companyName: 'company'};
+		let payloadLength = JSON.stringify(payload).length;
+		request = new MockRequest(
+			{url: '/api/notifications/unsubscribe', ...requestParameters, method: 'POST', headers: {...headers, 'content-length': payloadLength}},
+			[],
+			false
+		);
+		response = new MockResponse();
+		respond(request, response);
+		await response.finished;
+		_t.same(response.head(), [415, 'Unsupported Media Type'], 'responds 415 to POST with missing Content Type');
+
+		request = new MockRequest(
+			{url: '/api/notifications/unsubscribe', ...requestParameters, method: 'POST', headers: {...headers, 'content-length': payloadLength, 'content-type': 'application/xml'}},
+			[],
+			false
+		);
+		response = new MockResponse();
+		respond(request, response);
+		await response.finished;
+		_t.same(response.head(), [415, 'Unsupported Media Type'], 'responds 415 to POST with invalid Content Type');
+
+		request = new MockRequest(
+			{url: '/api/notifications/unsubscribe', ...requestParameters, method: 'POST', headers: {...headers, 'content-length': payloadLength, 'content-type': 'application/javascript'}},
+			payload
+		);
+		response = new MockResponse();
+		respond(request, response);
+		await response.finished;
+		_t.same(response.head(), [400, 'Bad Request'], 'responds 400 to POST with bad Unsubscription data');
+
+		payload = {companyName: 'company', subscriptionId: 'fail'};
+		payloadLength = JSON.stringify(payload).length;
+		metrics.reset();
+		request = new MockRequest(
+			{url: '/api/notifications/unsubscribe', ...requestParameters, method: 'POST', headers: {...headers, 'content-length': payloadLength, 'content-type': 'application/javascript'}},
+			payload
+		);
+		response = new MockResponse();
+		respond(request, response);
+		await response.finished;
+		_t.same(response.head(), [500, 'Internal Server Error'], 'responds 500 to POST with failed Subscription subscription');
+		_t.same(metrics.calls(), ['notifications.failures.notremovedfromdatabase'], 'Metric notifications.failures.notremovedfromdatabase incremented');
+
+		payload = {companyName: 'company', subscriptionId: '1234'};
+		payloadLength = JSON.stringify(payload).length;
+		metrics.reset();
+		request = new MockRequest(
+			{url: '/api/notifications/unsubscribe', ...requestParameters, method: 'POST', headers: {...headers, 'content-length': payloadLength, 'content-type': 'application/javascript'}},
+			payload
+		);
+		response = new MockResponse();
+		respond(request, response);
+		await response.finished;
+		_t.same(response.result(), [{companyName: 'company'}], 'responds with answer from Notifications.unsubscribe');
+		_t.same(metrics.calls(), ['notifications.unsubscriptions'], 'Metric notifications.unsubscriptions incremented');
 
 		_t.end();
 	});
@@ -421,11 +536,31 @@ function MockNotifications() {
 				companyName
 			};
 		},
+		unsubscribe: ({subscriptionId, companyName}) => {
+			if (subscriptionId === 'fail') {
+				throw new Error('Failed');
+			}
+
+			return [{
+				companyName
+			}];
+		},
 		_disable: () => {
 			_enabled = false;
 		},
 		_enable: () => {
 			_enabled = true;
+		}
+	};
+}
+
+function MockMetrics() {
+	let _calls = [];
+	return {
+		inc: metric => _calls.push(metric),
+		calls: () => Object.freeze(_calls.slice(0)),
+		reset: () => {
+			_calls = [];
 		}
 	};
 }
