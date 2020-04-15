@@ -38,7 +38,7 @@ test('/api/queue', async t => {
 	const payload = {userName: 'user', companyName: 'company', subscriptionId: '1234'};
 	const payloadLength = JSON.stringify(payload).length;
 	const request = new MockRequest(
-		{url: '/api/queue', ...requestParameters, method: 'PUT', headers: {...headers, 'content-length': payloadLength, 'content-type': 'application/javascript'}},
+		{url: '/api/queue', ...requestParameters, method: 'PUT', headers: {...headers, 'content-length': payloadLength, 'content-type': 'application/json'}},
 		payload
 	);
 	const response = new MockResponse();
@@ -119,7 +119,7 @@ test('/api/notifications', async t => {
 		let payload = {companyName: 'company', subscription: {}, subscriptionId: '1234'};
 		let payloadLength = JSON.stringify(payload).length;
 		request = new MockRequest(
-			{url: '/api/notifications/subscribe', ...requestParameters, method: 'POST', headers: {...headers, 'content-length': payloadLength, 'content-type': 'application/javascript'}},
+			{url: '/api/notifications/subscribe', ...requestParameters, method: 'POST', headers: {...headers, 'content-length': payloadLength, 'content-type': 'application/json'}},
 			payload
 		);
 		response = new MockResponse();
@@ -133,7 +133,7 @@ test('/api/notifications', async t => {
 		payloadLength = JSON.stringify(payload).length;
 		metrics.reset();
 		request = new MockRequest(
-			{url: '/api/notifications/subscribe', ...requestParameters, method: 'POST', headers: {...headers, 'content-length': payloadLength, 'content-type': 'application/javascript'}},
+			{url: '/api/notifications/subscribe', ...requestParameters, method: 'POST', headers: {...headers, 'content-length': payloadLength, 'content-type': 'application/json'}},
 			payload
 		);
 		response = new MockResponse();
@@ -146,7 +146,7 @@ test('/api/notifications', async t => {
 		payloadLength = JSON.stringify(payload).length;
 		metrics.reset();
 		request = new MockRequest(
-			{url: '/api/notifications/subscribe', ...requestParameters, method: 'POST', headers: {...headers, 'content-length': payloadLength, 'content-type': 'application/javascript'}},
+			{url: '/api/notifications/subscribe', ...requestParameters, method: 'POST', headers: {...headers, 'content-length': payloadLength, 'content-type': 'application/json'}},
 			payload
 		);
 		response = new MockResponse();
@@ -174,7 +174,7 @@ test('/api/notifications', async t => {
 		let payload = {companyName: 'company'};
 		let payloadLength = JSON.stringify(payload).length;
 		request = new MockRequest(
-			{url: '/api/notifications/unsubscribe', ...requestParameters, method: 'POST', headers: {...headers, 'content-length': payloadLength, 'content-type': 'application/javascript'}},
+			{url: '/api/notifications/unsubscribe', ...requestParameters, method: 'POST', headers: {...headers, 'content-length': payloadLength, 'content-type': 'application/json'}},
 			payload
 		);
 		response = new MockResponse();
@@ -186,7 +186,7 @@ test('/api/notifications', async t => {
 		payloadLength = JSON.stringify(payload).length;
 		metrics.reset();
 		request = new MockRequest(
-			{url: '/api/notifications/unsubscribe', ...requestParameters, method: 'POST', headers: {...headers, 'content-length': payloadLength, 'content-type': 'application/javascript'}},
+			{url: '/api/notifications/unsubscribe', ...requestParameters, method: 'POST', headers: {...headers, 'content-length': payloadLength, 'content-type': 'application/json'}},
 			payload
 		);
 		response = new MockResponse();
@@ -199,7 +199,7 @@ test('/api/notifications', async t => {
 		payloadLength = JSON.stringify(payload).length;
 		metrics.reset();
 		request = new MockRequest(
-			{url: '/api/notifications/unsubscribe', ...requestParameters, method: 'POST', headers: {...headers, 'content-length': payloadLength, 'content-type': 'application/javascript'}},
+			{url: '/api/notifications/unsubscribe', ...requestParameters, method: 'POST', headers: {...headers, 'content-length': payloadLength, 'content-type': 'application/json'}},
 			payload
 		);
 		response = new MockResponse();
@@ -229,7 +229,7 @@ function testAllowedMethods(t, url, allowed = ['GET']) {
 	});
 }
 
-async function testContentLength(t, url, method = 'POST', contentType = 'application/javascript; charset=utf-8') {
+async function testContentLength(t, url, method = 'POST', contentType = 'application/json; charset=utf-8') {
 	let request = new MockRequest({url, ...requestParameters, method});
 	let response = new MockResponse();
 	respond(request, response);
