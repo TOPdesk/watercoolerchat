@@ -20,32 +20,10 @@ test('/notapi', async t => {
 });
 
 test('/api/features/enabled', async t => {
-	let request = new MockRequest({url: '/api/features/enabled', ...requestParameters, method: 'HEAD'});
-	let response = new MockResponse();
-	respond(request, response);
-	await response.finished;
-	t.same(response.head(), [405, 'Method Not Allowed'], 'responds 405 to HEAD');
+	await testAllowedMethods(t, '/api/features/enabled');
 
-	request = new MockRequest({url: '/api/features/enabled', ...requestParameters, method: 'PUT'});
-	response = new MockResponse();
-	respond(request, response);
-	await response.finished;
-	t.same(response.head(), [405, 'Method Not Allowed'], 'responds 405 to PUT');
-
-	request = new MockRequest({url: '/api/features/enabled', ...requestParameters, method: 'POST'});
-	response = new MockResponse();
-	respond(request, response);
-	await response.finished;
-	t.same(response.head(), [405, 'Method Not Allowed'], 'responds 405 to POST');
-
-	request = new MockRequest({url: '/api/features/enabled', ...requestParameters, method: 'DELETE'});
-	response = new MockResponse();
-	respond(request, response);
-	await response.finished;
-	t.same(response.head(), [405, 'Method Not Allowed'], 'responds 405 to DELETE');
-
-	request = new MockRequest({url: '/api/features/enabled', ...requestParameters});
-	response = new MockResponse();
+	const request = new MockRequest({url: '/api/features/enabled', ...requestParameters});
+	const response = new MockResponse();
 	respond(request, response);
 	await response.finished;
 	t.same(response.result(), {features: ['feature1', 'feature2']}, 'returns active features');
@@ -53,73 +31,17 @@ test('/api/features/enabled', async t => {
 });
 
 test('/api/queue', async t => {
-	let request = new MockRequest({url: '/api/queue', ...requestParameters});
-	let response = new MockResponse();
-	respond(request, response);
-	await response.finished;
-	t.same(response.head(), [405, 'Method Not Allowed'], 'responds 405 to GET');
-
-	request = new MockRequest({url: '/api/queue', ...requestParameters, method: 'HEAD'});
-	response = new MockResponse();
-	respond(request, response);
-	await response.finished;
-	t.same(response.head(), [405, 'Method Not Allowed'], 'responds 405 to HEAD');
-
-	request = new MockRequest({url: '/api/queue', ...requestParameters, method: 'POST'});
-	response = new MockResponse();
-	respond(request, response);
-	await response.finished;
-	t.same(response.head(), [405, 'Method Not Allowed'], 'responds 405 to POST');
-
-	request = new MockRequest({url: '/api/queue', ...requestParameters, method: 'DELETE'});
-	response = new MockResponse();
-	respond(request, response);
-	await response.finished;
-	t.same(response.head(), [405, 'Method Not Allowed'], 'responds 405 to DELETE');
-
-	request = new MockRequest({url: '/api/queue', ...requestParameters, method: 'PUT'});
-	response = new MockResponse();
-	respond(request, response);
-	await response.finished;
-	t.same(response.head(), [411, 'Length Required'], 'responds 411 to PUT without Content-Length');
-
-	request = new MockRequest(
-		{url: '/api/queue', ...requestParameters, method: 'PUT', headers: {...headers, 'content-length': 1, 'content-type': 'application/javascript; charset=utf-8'}},
-		[],
-		false
-	);
-	response = new MockResponse();
-	respond(request, response);
-	await response.finished;
-	t.same(response.head(), [400, 'Bad Request'], 'responds 400 to PUT with bad Content-Length');
+	await testAllowedMethods(t, '/api/queue', ['PUT']);
+	await testContentLength(t, '/api/queue', 'PUT');
+	await testContentType(t, '/api/queue', 'PUT');
 
 	const payload = {userName: 'user', companyName: 'company', subscriptionId: '1234'};
 	const payloadLength = JSON.stringify(payload).length;
-	request = new MockRequest(
-		{url: '/api/queue', ...requestParameters, method: 'PUT', headers: {...headers, 'content-length': payloadLength}},
-		[],
-		false
-	);
-	response = new MockResponse();
-	respond(request, response);
-	await response.finished;
-	t.same(response.head(), [415, 'Unsupported Media Type'], 'responds 415 to PUT with missing Content Type');
-
-	request = new MockRequest(
-		{url: '/api/queue', ...requestParameters, method: 'PUT', headers: {...headers, 'content-length': payloadLength, 'content-type': 'application/xml'}},
-		[],
-		false
-	);
-	response = new MockResponse();
-	respond(request, response);
-	await response.finished;
-	t.same(response.head(), [415, 'Unsupported Media Type'], 'responds 415 to PUT with invalid Content Type');
-
-	request = new MockRequest(
+	const request = new MockRequest(
 		{url: '/api/queue', ...requestParameters, method: 'PUT', headers: {...headers, 'content-length': payloadLength, 'content-type': 'application/javascript'}},
 		payload
 	);
-	response = new MockResponse();
+	const response = new MockResponse();
 	respond(request, response);
 	await response.finished;
 	t.same(response.result(), {userName: 'user', companyName: 'company', queueId: '4321'}, 'responds with answer from Queue.add');
@@ -127,32 +49,10 @@ test('/api/queue', async t => {
 });
 
 test('/api/match', async t => {
-	let request = new MockRequest({url: '/api/match/', ...requestParameters, method: 'HEAD'});
+	await testAllowedMethods(t, '/api/match/myid');
+
+	let request = new MockRequest({url: '/api/match/', ...requestParameters});
 	let response = new MockResponse();
-	respond(request, response);
-	await response.finished;
-	t.same(response.head(), [405, 'Method Not Allowed'], 'responds 405 to HEAD');
-
-	request = new MockRequest({url: '/api/match/', ...requestParameters, method: 'POST'});
-	response = new MockResponse();
-	respond(request, response);
-	await response.finished;
-	t.same(response.head(), [405, 'Method Not Allowed'], 'responds 405 to POST');
-
-	request = new MockRequest({url: '/api/match/', ...requestParameters, method: 'PUT'});
-	response = new MockResponse();
-	respond(request, response);
-	await response.finished;
-	t.same(response.head(), [405, 'Method Not Allowed'], 'responds 405 to PUT');
-
-	request = new MockRequest({url: '/api/match/', ...requestParameters, method: 'DELETE'});
-	response = new MockResponse();
-	respond(request, response);
-	await response.finished;
-	t.same(response.head(), [405, 'Method Not Allowed'], 'responds 405 to DELETE');
-
-	request = new MockRequest({url: '/api/match/', ...requestParameters});
-	response = new MockResponse();
 	respond(request, response);
 	await response.finished;
 	t.same(response.head(), [404, 'Not Found'], 'responds 404 to GET without QueueId');
@@ -182,29 +82,7 @@ test('/api/notifications', async t => {
 
 	notifications._enable();
 
-	request = new MockRequest({url: '/api/notifications/', ...requestParameters, method: 'HEAD'});
-	response = new MockResponse();
-	respond(request, response);
-	await response.finished;
-	t.same(response.head(), [405, 'Method Not Allowed'], 'responds 405 to HEAD');
-
-	request = new MockRequest({url: '/api/notifications/', ...requestParameters, method: 'PUT'});
-	response = new MockResponse();
-	respond(request, response);
-	await response.finished;
-	t.same(response.head(), [405, 'Method Not Allowed'], 'responds 405 to PUT');
-
-	request = new MockRequest({url: '/api/notifications/', ...requestParameters, method: 'POST'});
-	response = new MockResponse();
-	respond(request, response);
-	await response.finished;
-	t.same(response.head(), [405, 'Method Not Allowed'], 'responds 405 to POST');
-
-	request = new MockRequest({url: '/api/notifications/', ...requestParameters, method: 'DELETE'});
-	response = new MockResponse();
-	respond(request, response);
-	await response.finished;
-	t.same(response.head(), [405, 'Method Not Allowed'], 'responds 405 to DELETE');
+	await testAllowedMethods(t, '/api/notifications/');
 
 	request = new MockRequest({url: '/api/notifications/', ...requestParameters});
 	response = new MockResponse();
@@ -226,75 +104,20 @@ test('/api/notifications', async t => {
 
 	t.test('subscribe', async _t => {
 		notifications._disable();
-		request = new MockRequest({url: '/api/notifications/subscribe', ...requestParameters});
-		response = new MockResponse();
+		let request = new MockRequest({url: '/api/notifications/subscribe', ...requestParameters});
+		let response = new MockResponse();
 		respond(request, response);
 		await response.finished;
 		_t.same(response.head(), [404, 'Not Found'], 'responds 404 if Notifiations are disabled');
 
 		notifications._enable();
-		request = new MockRequest({url: '/api/notifications/subscribe', ...requestParameters, method: 'HEAD'});
-		response = new MockResponse();
-		respond(request, response);
-		await response.finished;
-		_t.same(response.head(), [405, 'Method Not Allowed'], 'responds 405 to HEAD');
 
-		request = new MockRequest({url: '/api/notifications/subscribe', ...requestParameters, method: 'PUT'});
-		response = new MockResponse();
-		respond(request, response);
-		await response.finished;
-		_t.same(response.head(), [405, 'Method Not Allowed'], 'responds 405 to PUT');
-
-		request = new MockRequest({url: '/api/notifications/subscribe', ...requestParameters, method: 'GET'});
-		response = new MockResponse();
-		respond(request, response);
-		await response.finished;
-		_t.same(response.head(), [405, 'Method Not Allowed'], 'responds 405 to GET');
-
-		request = new MockRequest({url: '/api/notifications/subscribe', ...requestParameters, method: 'DELETE'});
-		response = new MockResponse();
-		respond(request, response);
-		await response.finished;
-		_t.same(response.head(), [405, 'Method Not Allowed'], 'responds 405 to DELETE');
-
-		request = new MockRequest({url: '/api/notifications/subscribe', ...requestParameters, method: 'POST'});
-		response = new MockResponse();
-		respond(request, response);
-		await response.finished;
-		_t.same(response.head(), [411, 'Length Required'], 'responds 411 to POST without Content-Length');
-
-		request = new MockRequest(
-			{url: '/api/notifications/subscribe', ...requestParameters, method: 'POST', headers: {...headers, 'content-length': 1, 'content-type': 'application/javascript; charset=utf-8'}},
-			[],
-			false
-		);
-		response = new MockResponse();
-		respond(request, response);
-		await response.finished;
-		_t.same(response.head(), [400, 'Bad Request'], 'responds 400 to POST with bad Content-Length');
+		await testAllowedMethods(_t, '/api/notifications/subscribe', ['POST']);
+		await testContentLength(_t, '/api/notifications/subscribe', 'POST');
+		await testContentType(_t, '/api/notifications/subscribe', 'POST');
 
 		let payload = {companyName: 'company', subscription: {}, subscriptionId: '1234'};
 		let payloadLength = JSON.stringify(payload).length;
-		request = new MockRequest(
-			{url: '/api/notifications/subscribe', ...requestParameters, method: 'POST', headers: {...headers, 'content-length': payloadLength}},
-			[],
-			false
-		);
-		response = new MockResponse();
-		respond(request, response);
-		await response.finished;
-		_t.same(response.head(), [415, 'Unsupported Media Type'], 'responds 415 to POST with missing Content Type');
-
-		request = new MockRequest(
-			{url: '/api/notifications/subscribe', ...requestParameters, method: 'POST', headers: {...headers, 'content-length': payloadLength, 'content-type': 'application/xml'}},
-			[],
-			false
-		);
-		response = new MockResponse();
-		respond(request, response);
-		await response.finished;
-		_t.same(response.head(), [415, 'Unsupported Media Type'], 'responds 415 to POST with invalid Content Type');
-
 		request = new MockRequest(
 			{url: '/api/notifications/subscribe', ...requestParameters, method: 'POST', headers: {...headers, 'content-length': payloadLength, 'content-type': 'application/javascript'}},
 			payload
@@ -343,68 +166,13 @@ test('/api/notifications', async t => {
 		_t.same(response.head(), [404, 'Not Found'], 'responds 404 if Notifiations are disabled');
 
 		notifications._enable();
-		request = new MockRequest({url: '/api/notifications/unsubscribe', ...requestParameters, method: 'HEAD'});
-		response = new MockResponse();
-		respond(request, response);
-		await response.finished;
-		_t.same(response.head(), [405, 'Method Not Allowed'], 'responds 405 to HEAD');
 
-		request = new MockRequest({url: '/api/notifications/unsubscribe', ...requestParameters, method: 'PUT'});
-		response = new MockResponse();
-		respond(request, response);
-		await response.finished;
-		_t.same(response.head(), [405, 'Method Not Allowed'], 'responds 405 to PUT');
-
-		request = new MockRequest({url: '/api/notifications/unsubscribe', ...requestParameters, method: 'GET'});
-		response = new MockResponse();
-		respond(request, response);
-		await response.finished;
-		_t.same(response.head(), [405, 'Method Not Allowed'], 'responds 405 to GET');
-
-		request = new MockRequest({url: '/api/notifications/unsubscribe', ...requestParameters, method: 'DELETE'});
-		response = new MockResponse();
-		respond(request, response);
-		await response.finished;
-		_t.same(response.head(), [405, 'Method Not Allowed'], 'responds 405 to DELETE');
-
-		request = new MockRequest({url: '/api/notifications/unsubscribe', ...requestParameters, method: 'POST'});
-		response = new MockResponse();
-		respond(request, response);
-		await response.finished;
-		_t.same(response.head(), [411, 'Length Required'], 'responds 411 to POST without Content-Length');
-
-		request = new MockRequest(
-			{url: '/api/notifications/unsubscribe', ...requestParameters, method: 'POST', headers: {...headers, 'content-length': 1, 'content-type': 'application/javascript; charset=utf-8'}},
-			[],
-			false
-		);
-		response = new MockResponse();
-		respond(request, response);
-		await response.finished;
-		_t.same(response.head(), [400, 'Bad Request'], 'responds 400 to POST with bad Content-Length');
+		await testAllowedMethods(_t, '/api/notifications/unsubscribe', ['POST']);
+		await testContentLength(_t, '/api/notifications/unsubscribe', 'POST');
+		await testContentType(_t, '/api/notifications/unsubscribe', 'POST');
 
 		let payload = {companyName: 'company'};
 		let payloadLength = JSON.stringify(payload).length;
-		request = new MockRequest(
-			{url: '/api/notifications/unsubscribe', ...requestParameters, method: 'POST', headers: {...headers, 'content-length': payloadLength}},
-			[],
-			false
-		);
-		response = new MockResponse();
-		respond(request, response);
-		await response.finished;
-		_t.same(response.head(), [415, 'Unsupported Media Type'], 'responds 415 to POST with missing Content Type');
-
-		request = new MockRequest(
-			{url: '/api/notifications/unsubscribe', ...requestParameters, method: 'POST', headers: {...headers, 'content-length': payloadLength, 'content-type': 'application/xml'}},
-			[],
-			false
-		);
-		response = new MockResponse();
-		respond(request, response);
-		await response.finished;
-		_t.same(response.head(), [415, 'Unsupported Media Type'], 'responds 415 to POST with invalid Content Type');
-
 		request = new MockRequest(
 			{url: '/api/notifications/unsubscribe', ...requestParameters, method: 'POST', headers: {...headers, 'content-length': payloadLength, 'content-type': 'application/javascript'}},
 			payload
@@ -445,6 +213,63 @@ test('/api/notifications', async t => {
 
 	t.end();
 });
+
+function testAllowedMethods(t, url, allowed = ['GET']) {
+	return new Promise(resolve => {
+		['GET', 'HEAD', 'PUT', 'POST', 'DELETE'].forEach(async method => {
+			if (!allowed.includes(method)) {
+				const request = new MockRequest({url, ...requestParameters, method, headers});
+				const response = new MockResponse();
+				respond(request, response);
+				await response.finished;
+				t.same(response.head(), [405, 'Method Not Allowed'], `responds 405 to ${method}`);
+			}
+		});
+		resolve();
+	});
+}
+
+async function testContentLength(t, url, method = 'POST', contentType = 'application/javascript; charset=utf-8') {
+	let request = new MockRequest({url, ...requestParameters, method});
+	let response = new MockResponse();
+	respond(request, response);
+	await response.finished;
+	t.same(response.head(), [411, 'Length Required'], `responds 411 to ${method} without Content-Length`);
+
+	request = new MockRequest(
+		{url, ...requestParameters, method, headers: {...headers, 'content-length': 1, 'content-type': contentType}},
+		[],
+		false
+	);
+	response = new MockResponse();
+	respond(request, response);
+	await response.finished;
+	t.same(response.head(), [400, 'Bad Request'], `responds 400 to ${method} with bad Content-Length`);
+}
+
+async function testContentType(t, url, method = 'POST') {
+	const payload = {test: 'payload'};
+	const payloadLength = JSON.stringify(payload).length;
+	let request = new MockRequest(
+		{url, ...requestParameters, method, headers: {...headers, 'content-length': payloadLength}},
+		[],
+		false
+	);
+	let response = new MockResponse();
+	respond(request, response);
+	await response.finished;
+	t.same(response.head(), [415, 'Unsupported Media Type'], `responds 415 to ${method} with missing Content Type`);
+
+	request = new MockRequest(
+		{url, ...requestParameters, method, headers: {...headers, 'content-length': payloadLength, 'content-type': 'totally-not/content-type'}},
+		[],
+		false
+	);
+	response = new MockResponse();
+	respond(request, response);
+	await response.finished;
+	t.same(response.head(), [415, 'Unsupported Media Type'], `responds 415 to ${method} with invalid Content Type`);
+}
 
 function MockRequest(fields, object, complete = true) {
 	const stream = new PassThrough();
