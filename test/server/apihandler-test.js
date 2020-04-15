@@ -49,21 +49,21 @@ test('/api/queue', async t => {
 });
 
 test('/api/match', async t => {
-	await testAllowedMethods(t, '/api/match/myid');
+	await testAllowedMethods(t, '/api/match/myid', ['POST']);
 
-	let request = new MockRequest({url: '/api/match/', ...requestParameters});
+	let request = new MockRequest({url: '/api/match/', ...requestParameters, method: 'POST'});
 	let response = new MockResponse();
 	respond(request, response);
 	await response.finished;
 	t.same(response.head(), [404, 'Not Found'], 'responds 404 to GET without QueueId');
 
-	request = new MockRequest({url: '/api/match/notfound', ...requestParameters});
+	request = new MockRequest({url: '/api/match/notfound', ...requestParameters, method: 'POST'});
 	response = new MockResponse();
 	respond(request, response);
 	await response.finished;
 	t.same(response.head(), [404, 'Not Found'], 'responds 404 to GET with non-existing QueueId');
 
-	request = new MockRequest({url: '/api/match/myid', ...requestParameters});
+	request = new MockRequest({url: '/api/match/myid', ...requestParameters, method: 'POST'});
 	response = new MockResponse();
 	respond(request, response);
 	await response.finished;
