@@ -41,8 +41,8 @@
         "error",
         "always",
         {
-            "ignorePattern": "c8",
-            "ignoreInlineComments": true
+          "ignorePattern": "c8",
+          "ignoreInlineComments": true
         }
       ]
     },
@@ -63,6 +63,7 @@
   "license": "MIT",
   "dependencies": {
     "@koa/router": "^8.0.8",
+    "applicationinsights": "^1.8.0",
     "isomorphic-fetch": "^2.2.1",
     "koa": "^2.11.0",
     "koa-bodyparser": "^4.2.1",
@@ -73,7 +74,7 @@
     "web-push": "^3.4.3"
   },
   "devDependencies": {
-    "c8": "^7.1.0",
+    "c8": "^7.2.0",
     "tap": "^14.10.7",
     "xo": "^0.28.2"
   }
