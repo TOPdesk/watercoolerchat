@@ -8,4 +8,4 @@ const server = (process.env.NEW_SERVER && process.env.NEW_SERVER !== 'false')
 process.on('SIGINT', server.stop);
 process.on('SIGTERM', server.stop);
 
-server.start();
+server.start(process.env.PORT);
