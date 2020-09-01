@@ -18,7 +18,7 @@ new Vue({ // eslint-disable-line no-new, no-undef
 			companyName,
 			userName: '',
 			queueId: '',
-			chatPartner: '',
+			chatPartners: '',
 			state: states.notInQueue
 		};
 	},
@@ -35,9 +35,9 @@ new Vue({ // eslint-disable-line no-new, no-undef
 	methods: {
 		async enterQueue() {
 			this.state = states.queued;
-			this.chatPartner = '';
+			this.chatPartners = '';
 			this.queueId = (await this.addtoQueue(this.userName, this.companyName)).queueId;
-			this.searchChatPartner(this.queueId);
+			this.searchChatPartners(this.queueId);
 		},
 		async addtoQueue(userName, companyName) {
 			const subscriptionId = localStorage.getItem('subscriptionId');
@@ -53,7 +53,7 @@ new Vue({ // eslint-disable-line no-new, no-undef
 			});
 			return response.json();
 		},
-		async searchChatPartner(queueId) {
+		async searchChatPartners(queueId) {
 			const response = await fetch(`/api/match/${queueId}`, {
 				method: 'POST',
 				headers: {
@@ -61,12 +61,12 @@ new Vue({ // eslint-disable-line no-new, no-undef
 				}
 			});
 			const result = await response.json();
-			if (result.matchResult === 'found') {
+			if (result.matchResult === 'groupFull') {
 				this.chatUrl = result.chatUrl;
-				this.chatPartner = result.chatPartner;
+				this.chatPartners = result.chatPartners;
 				this.state = states.chatReady;
 			} else {
-				window.setTimeout(() => this.searchChatPartner(queueId), 5000);
+				window.setTimeout(() => this.searchChatPartners(queueId), 5000);
 			}
 		},
 		async retrieveFeatures() {

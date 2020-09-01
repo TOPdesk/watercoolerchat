@@ -35,7 +35,7 @@
 
 				<template v-if="state === 'chat-ready'">
 					<p class="messageheader">Chat partner found!</p>
-					<p>Go to Talky.io to chat<span v-if="chatPartner"> with <i>{{chatPartner}}</i></span>: <a :href="chatUrl" target="_blank" rel="noopener">{{chatUrl}}</a>
+					<p>Go to Talky.io to chat<span v-if="chatPartners"> with <i>{{chatPartners}}</i></span>: <a :href="chatUrl" target="_blank" rel="noopener">{{chatUrl}}</a>
 				</template>
 				<notifications-button v-if="features.includes('notifications')">
 			</div>
