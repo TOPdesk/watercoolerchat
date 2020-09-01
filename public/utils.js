@@ -12,7 +12,7 @@ export const redirectToHttps = () => {
 };
 
 export const redirectToTOPdesk = () => {
-	window.location.href = '/at/TOPdesk';
+	window.location.href = '/at/TOPdesk/';
 };
 
 export const getCompanyNameFromUrl = () => {
