@@ -28,13 +28,13 @@
                 </template>
 
             	<template v-if="state === 'queued'">
-                    <p class="messageheader">We are looking for a chat partner</p>
+                    <p class="messageheader">We are looking for chat partners (this may take several minutes)</p>
                     <div class="loader">...</div>
 					<br><br>
                 </template>
 
 				<template v-if="state === 'chat-ready'">
-					<p class="messageheader">Chat partner found!</p>
+					<p class="messageheader">Chat partners found!</p>
 					<p>Go to Talky.io to chat<span v-if="chatPartners"> with <i>{{chatPartners}}</i></span>: <a :href="chatUrl" target="_blank" rel="noopener">{{chatUrl}}</a>
 				</template>
 				<notifications-button v-if="features.includes('notifications')">
