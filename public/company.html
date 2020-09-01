@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-	<title>Have a watercooler chat online!</title>
+	<title>Do the Virtual escape room online!</title>
 	<script src="https://cdn.jsdelivr.net/npm/vue"></script>
 	<script type="module" src="/notifications.js"></script>
 	<link rel="icon" href="/favicon.ico" type="image/x-icon">
@@ -13,8 +13,8 @@
     <div id="app">
         <div id="watercooler"></div>
         <div id="content">
-            <h1>Have a watercooler chat online at <i>{{companyName}}</i>!</h1>
-            <p>Have a random chat with your colleagues from {{companyName}}, as if you are standing by the watercooler!</p>
+            <h1>Do the Virtual escape room at <i>{{companyName}}</i>!</h1>
+            <p>Do the escape room with your colleagues from {{companyName}}, as if you formed your team by the watercooler!</p>
 
 			<div class="messagebox">
             	<template v-if="state === 'not-in-queue'">
@@ -35,21 +35,19 @@
 
 				<template v-if="state === 'chat-ready'">
 					<p class="messageheader">Chat partners found!</p>
-					<p>Go to Microsoft Teams to chat<span v-if="chatPartners"> with <i>{{chatPartners}}</i></span>: <a :href="chatUrl" target="_blank" rel="noopener">Start Teams meeting</a>
+					<p>Go to Microsoft Teams to chat<span v-if="chatPartners"> with <i>{{chatPartners}}</i></span>: <a :href="chatUrl" target="_blank" rel="noopener">Start Teams meeting</a>.
+					<p>If your team is in the chat, you can start the Escape room: <a href="https://www.online-escape-game.nl/topdesklp" target="_blank" rel="noopener">Start Escape Room</a>.
 				</template>
 				<notifications-button v-if="features.includes('notifications')">
 			</div>
-			<p>Share this URL with your colleagues: <span style="white-space: nowrap;"><a :href="`https://have-a.watercoolerchat.online/at/${companyName}/`">https://have-a.watercoolerchat.online/at/{{companyName}}/</a></span></p>
 
 			<template v-if="state == 'not-in-queue'">
                 <h2>How it works:</h2>
                 <ul>
-                    <li>Decide on a moment with your colleagues to have a random chat, e.g. the typical coffee time 10am or 3pm</li>
-                    <li>Share this URL with your colleagues: <span style="white-space: nowrap;"><a :href="`https://have-a.watercoolerchat.online/at/${companyName}/`">https://have-a.watercoolerchat.online/at/{{companyName}}/</a></span></li>
                     <li>Click the button to enter the queue.</li>
-                    <li>We select a random colleague for you to chat with.</li>
-                    <li>We'll show you both a unique link to a free <a href="https://talky.io/" target="_blank" rel="noopener">Talky</a> chatroom.</li>
-                    <li>Click the link, set up your devices, and start chatting!</li>
+                    <li>We select a group of random colleagues for you to do the escape room with.</li>
+                    <li>We'll show you a unique link to a MS Teams meeting.</li>
+                    <li>Click the link, set up your devices, and start the escape room!</li>
                 </ul>
             </template>
         </div>

@@ -11,6 +11,10 @@ export const redirectToHttps = () => {
 	}
 };
 
+export const redirectToTOPdesk = () => {
+	window.location.href = '/at/TOPdesk';
+};
+
 export const getCompanyNameFromUrl = () => {
 	const url = window.location.pathname.replace(/\/$/, '');
 	return decodeURIComponent(url.slice(url.lastIndexOf('/') + 1));
