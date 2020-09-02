@@ -21,8 +21,8 @@
                     <p class="messageheader">Let's get started!</p>
                     <p>
                         <form action="javascript:void(0)">
-                            <label for="userName">Enter your name (optional):</label><input type="text" name="userName" id="userName" placeholder="Anonymous" v-model.userName="userName"/><br>
-                            <input type="submit" class="bigbutton" value="Put me in the queue for a chat!" v-on:click="enterQueue">
+                            <label for="userName">Enter your name:</label><input type="text" name="userName" id="userName" placeholder="Anonymous" v-model.userName="userName"/><br>
+                            <input type="submit" class="bigbutton" value="Put me in the queue for a team!" v-on:click="enterQueue">
                         </form>
                     </p>
                 </template>
@@ -35,7 +35,7 @@
 
 				<template v-if="state === 'chat-ready'">
 					<p class="messageheader">Chat partners found!</p>
-					<p>Go to Microsoft Teams to chat<span v-if="chatPartners"> with <i>{{chatPartners}}</i></span>: <a :href="chatUrl" target="_blank" rel="noopener">Start Teams meeting</a>.
+					<p>Go to chat<span v-if="chatPartners"> with <i>{{chatPartners}}</i></span>: <a :href="chatUrl" target="_blank" rel="noopener">Start Chat</a>.
 					<p>If your team is in the chat, you can start the Escape room: <a href="https://www.online-escape-game.nl/topdesklp" target="_blank" rel="noopener">Start Escape Room</a>.
 				</template>
 				<notifications-button v-if="features.includes('notifications')">
@@ -46,7 +46,7 @@
                 <ul>
                     <li>Click the button to enter the queue.</li>
                     <li>We select a group of random colleagues for you to do the escape room with.</li>
-                    <li>We'll show you a unique link to a MS Teams meeting.</li>
+                    <li>We'll show you a unique link to either a Micrsoft Teams meeting or Talky chat.</li>
                     <li>Click the link, set up your devices, and start the escape room!</li>
                 </ul>
             </template>
