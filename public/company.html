@@ -9,7 +9,14 @@
 	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Bree+Serif" type="text/css" />
 	<link rel="stylesheet" type="text/css" href="/style.css"/>
 </head>
-<body>
+<body onClick="(function(event) { if (event.target == document.getElementById('myModal')) { document.getElementById('myModal').style.display = 'none' }})(arguments[0])">
+	<div id="myModal" class="modal">
+		<div class="modal-content">
+			<span class="close" onClick="document.getElementById('myModal').style.display='none'">&times;</span>
+			<h1>The Watercoolerchat will shut down 16 March 2021.</h1>
+			<p>The watercoolerchat was conceived when the pandemic forced us all to work from home. After a successful first few months, its users gradually moved away to other platforms, like informal companywide meeting rooms in Microsoft Teams. Therefore we will stop providing this service at 16 March 2021.</p>
+		</div>
+	</div>
     <div id="app">
         <div id="watercooler"></div>
         <div id="content">
